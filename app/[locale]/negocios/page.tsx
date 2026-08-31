@@ -37,6 +37,7 @@ import {
   BizHow,
   BizPanel,
   BizPerks,
+  BizPockets,
   BizProblem,
   BizRates,
   BizStart,
@@ -91,13 +92,17 @@ export async function generateMetadata({
  *
  * Same argument shape as `/tarjeta` but aimed at an operator rather than a
  * person: what breaks today (problema) → what it is (qué es) → how you start
- * (cómo) → who it is for (casos) → how you run it day to day (panel) → what
- * the rates are (tasas) → why it beats the bank (compara) → what makes it
- * yours (marca, API) → the ask (empezar, faq, cierre).
+ * (cómo) → who it is for (casos) → how the money is organised (bolsillos) →
+ * where you run it (panel) → what the rates are (tasas) → why it beats the
+ * bank (compara) → what makes it yours (marca, API) → the ask (empezar, faq,
+ * cierre).
  *
- * `panel` sits after `casos` on purpose: it answers "and how do I actually
- * manage forty of these?", which is the question the use cases raise and
- * nothing before it answered.
+ * `bolsillos` and `panel` sit after `casos` in that order because they answer
+ * the two questions the use cases raise, and only in that order: "how do I keep
+ * forty cards' money apart?" and then "where do I watch it?". They also have
+ * deliberately different shapes — `bolsillos` is two columns with a drawing,
+ * `panel` is a head plus a grid — because three grid sections in a row is what
+ * makes a page read as padding.
  */
 export default async function BusinessPage({
   params,
@@ -170,6 +175,8 @@ export default async function BusinessPage({
           items={BIZ_CASES}
           after={<BizPerks />}
         />
+
+        <BizPockets />
 
         <BizPanel />
 

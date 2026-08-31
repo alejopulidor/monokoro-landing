@@ -11,7 +11,7 @@ import { TopUp } from "@/components/shared/topup";
 import { TrustPanel } from "@/components/shared/trust-panel";
 import { CardFace } from "@/components/shared/card-face";
 import { postHref } from "@/content/posts";
-import { fmtCOP } from "@/lib/format";
+import { fmtCOP, fmtUSD } from "@/lib/format";
 import { RATE_BUY, RATE_CARD, RATE_SELL, waLink } from "@/lib/config";
 import { cx } from "@/lib/cx";
 import {
@@ -22,6 +22,8 @@ import {
   BIZ_FLOW,
   BIZ_PANEL,
   BIZ_PERKS,
+  BIZ_POCKET_CARDS,
+  BIZ_POCKETS,
   BIZ_PROBLEM,
   BIZ_REQUIREMENTS,
   BIZ_STEPS,
@@ -102,12 +104,6 @@ export function BizWhatIs() {
               tokenizados, en la billetera de la empresa y a su nombre. Desde ese
               saldo emites las tarjetas que necesites: una por campaña, por
               cliente, por proveedor o por persona.
-            </p>
-            <p className="max-w-[560px] text-[19px] leading-[1.6] text-[var(--color-muted)] text-pretty">
-              Ese saldo se puede dividir en bolsillos: un monto reservado del que
-              consumen varias tarjetas a la vez —uno para pauta, uno para
-              proveedores, uno por cliente— sin sacar la plata de la billetera de
-              la empresa.
             </p>
             <p className="max-w-[560px] text-[19px] leading-[1.6] text-[var(--color-muted)] text-pretty">
               Cada tarjeta paga en dólares lo que se cobra en dólares, y en pesos
@@ -194,6 +190,68 @@ export function BizApiAccess() {
         Pedir el acceso <Arrow />
       </a>
     </div>
+  );
+}
+
+/**
+ * "Un saldo por frente, y las tarjetas que hagan falta."
+ *
+ * The two-column shape `BizBrand` uses: something drawn on the left, the
+ * reasons on the right. The drawing is the argument here -- "varias tarjetas
+ * consumen del mismo saldo" is one of those claims a diagram settles in a
+ * second and a paragraph never quite does.
+ *
+ * The figure is a **mock**, and it is labelled as one twice: `SALDO DE EJEMPLO`
+ * on the panel and again inside the `aria-label`. Same rule as `CardFace`'s
+ * balance -- a number on this site that is not marked referential or as an
+ * example is a bug. And `role="img"` collapses the subtree, so the label has to
+ * carry everything a sighted reader gets.
+ */
+export function BizPockets() {
+  return (
+    <section id="bolsillos" className="sec-lg gutter">
+      <div className="shell">
+        <SectionHead
+          eyebrow="BOLSILLOS"
+          title="Un saldo por frente, y las tarjetas que hagan falta."
+          lede="Un bolsillo es un monto reservado del saldo del negocio, y varias tarjetas consumen del mismo. El gasto de pauta queda separado del de proveedores sin que tengas que repartir montos tarjeta por tarjeta."
+        />
+
+        <div className="mt-[clamp(30px,4vw,46px)] flex flex-wrap gap-5">
+          <div
+            className="rv panel-flat flex min-w-0 flex-[1_1_320px] flex-col self-start p-[clamp(26px,3.4vw,38px)]"
+            role="img"
+            aria-label="Ejemplo de un bolsillo llamado Pauta con un saldo de ejemplo de 4.500,00 dólares, del que consumen tres tarjetas: Meta Ads terminada en 4821, TikTok Ads terminada en 7302 y Google Ads terminada en 5140."
+          >
+            <div className="ff-m text-[11px] tracking-[0.14em] text-[var(--color-mint)]">
+              BOLSILLO · PAUTA
+            </div>
+            <div className="tnum mt-3 text-[clamp(34px,4.6vw,52px)] font-semibold leading-none tracking-[-0.04em]">
+              {fmtUSD(4500)}{" "}
+              <span className="text-[0.42em] font-medium">USD</span>
+            </div>
+            <div className="ff-m mt-2.5 text-[10.5px] tracking-[0.14em] text-[rgba(239,246,240,0.5)]">
+              SALDO DE EJEMPLO
+            </div>
+
+            <SpecList
+              items={BIZ_POCKET_CARDS}
+              className="mt-[clamp(22px,3vw,30px)]"
+            />
+
+            <div className="ff-m mt-4 text-[10.5px] tracking-[0.14em] text-[rgba(239,246,240,0.5)]">
+              TRES TARJETAS · UN SOLO SALDO
+            </div>
+          </div>
+
+          <CardGrid
+            items={BIZ_POCKETS}
+            min={250}
+            className="min-w-0 flex-[1_1_420px] content-start gap-4"
+          />
+        </div>
+      </div>
+    </section>
   );
 }
 

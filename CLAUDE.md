@@ -727,10 +727,14 @@ them is roadmap rather than reality, the copy has to say so or come out.
     answer is a structured-data lie, not just a paragraph), added a hero spec
     row on both product pages, changed `CARD_USES` item 05, and appears in
     `/tarjeta`'s `DESCRIPTION`, its `Service` schema and `/llms.txt`.
-13. **The admin panel and the bolsillos** (`/negocios`, section `#panel`). A
-    whole section, two FAQ answers and a step in the money's journey describe a
-    surface nobody outside the company has seen. If the panel is not live this
-    is the second most expensive section on the site, after issuance itself.
+13. **The admin panel and the bolsillos** (`/negocios`, sections `#bolsillos`
+    and `#panel`). **Two** sections now, plus two FAQ answers, a step in the
+    money's journey, a compare-table row and a drawn example with a mock
+    balance — all describing a surface nobody outside the company has seen. If
+    either is not live this is the second most expensive part of the site,
+    after issuance itself. The bolsillos section carries a figure
+    (`4.500,00 USD`), which is labelled `SALDO DE EJEMPLO` on the panel and
+    again in its `aria-label`; keep both if the copy changes.
 14. **API, SDK and the iframe** (`/negocios`, section `#api`) — card issuing
     and control, balances, conversion, webhooks with a receipt per spend, an
     SDK over the same API, and an iframe that renders the card's number,

@@ -166,6 +166,55 @@ export const BIZ_CASES: RuledItem[] = [
 ];
 
 /**
+ * Bolsillos: the balance is divided, not the cards.
+ *
+ * The framing matters and is easy to get backwards. This page's pitch is "una
+ * tarjeta por campaña, por cliente, por proveedor" — so a bolsillo must never
+ * read as a *replacement* for that. It is the other axis: many cards, one
+ * reserved amount behind them. Write it as "el saldo se separa por frente" and
+ * the two claims reinforce each other; write it as "un bolsillo por campaña en
+ * vez de una tarjeta por campaña" and they fight.
+ *
+ * And a bolsillo is a division of the business's own balance — see the file
+ * header on why it is never a *cuenta*.
+ */
+export const BIZ_POCKETS: GridItem[] = [
+  {
+    n: "01",
+    t: "Un bolsillo por frente",
+    d: "Uno para pauta, uno para proveedores, uno por cliente. El gasto queda separado desde el origen, no al final del mes.",
+  },
+  {
+    n: "02",
+    t: "Varias tarjetas, un solo saldo",
+    d: "Todas las tarjetas del frente consumen del mismo bolsillo, así que no tienes que repartir montos tarjeta por tarjeta.",
+  },
+  {
+    n: "03",
+    t: "Hecho para pauta",
+    d: "Si una tarjeta se quema a mitad de campaña, creas otra y sigue consumiendo del mismo bolsillo. La campaña no se detiene.",
+  },
+  {
+    n: "04",
+    t: "Solo se gasta lo que pusiste",
+    d: "Tú decides cuánto entra a cada bolsillo, y eso es todo lo que puede salir por ahí. El resto del saldo no se toca.",
+  },
+];
+
+/**
+ * The example bolsillo drawn in that section: three cards, one balance.
+ *
+ * Marked as an example in the copy *and* in the panel's `aria-label`, the same
+ * way `CardFace` handles its own mock balance. A figure on this site that is
+ * not labelled as referential or as an example is a bug.
+ */
+export const BIZ_POCKET_CARDS = [
+  { k: "META ADS", v: "•••• 4821" },
+  { k: "TIKTOK ADS", v: "•••• 7302" },
+  { k: "GOOGLE ADS", v: "•••• 5140" },
+];
+
+/**
  * The admin surface, and the one section that adds a *second* place to do
  * things. The chat stays the fast path on purpose — every other section on this
  * page, the hero specs and the closing CTA all say "desde WhatsApp", so the
@@ -180,16 +229,11 @@ export const BIZ_PANEL: GridItem[] = [
   },
   {
     n: "02",
-    t: "Bolsillos",
-    d: "Un monto reservado del que consumen varias tarjetas a la vez. Ideal para pauta: el equipo gasta de un solo bolsillo y tú decides cuánto entra ahí.",
-  },
-  {
-    n: "03",
     t: "Gestión de cada tarjeta",
     d: "Creas, recargas, congelas o eliminas desde el panel, igual que por chat.",
   },
   {
-    n: "04",
+    n: "03",
     t: "Movimientos y comprobantes",
     d: "Cada gasto con su comprobante, filtrable por tarjeta, por bolsillo o por fecha.",
   },
@@ -201,6 +245,7 @@ export const BIZ_COMPARE: CompareRow[] = [
   { k: "Cobros en dólares", a: "Conversión y recargo", b: "Se pagan en dólares" },
   { k: "Si una se quema", a: "Reposición y espera", b: "Creas otra al instante" },
   { k: "Saldo entre campañas", a: "En pesos, se devalúa", b: "En dólares, a tu nombre" },
+  { k: "Separar el gasto", a: "Otra cuenta, si el banco la abre", b: "Un bolsillo por frente" },
   { k: "Tu marca en la tarjeta", a: "No aplica", b: "Cobrandeada" },
   { k: "Integración", a: "Archivos y conciliación manual", b: "API y webhooks" },
 ];
