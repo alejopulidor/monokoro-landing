@@ -128,18 +128,18 @@ export default function NotFound() {
             aria-hidden
           >
             <div
-              className="absolute left-[-16vw] top-[-14vw] h-[56vw] w-[56vw] rounded-full blur-[96px]"
+              className="absolute left-[-16vw] top-[-14vw] h-[56vw] w-[56vw] rounded-full"
               style={{
                 background:
-                  "radial-gradient(circle,rgba(106,221,155,.20),transparent 66%)",
+                  "radial-gradient(circle,rgba(106,221,155,.22) 0%,rgba(106,221,155,.11) 36%,rgba(106,221,155,.04) 56%,transparent 72%)",
                 animation: "auroraA 32s ease-in-out infinite",
               }}
             />
             <div
-              className="absolute bottom-[-16vw] right-[-14vw] h-[48vw] w-[48vw] rounded-full blur-[104px]"
+              className="absolute bottom-[-16vw] right-[-14vw] h-[48vw] w-[48vw] rounded-full"
               style={{
                 background:
-                  "radial-gradient(circle,rgba(51,130,137,.28),transparent 68%)",
+                  "radial-gradient(circle,rgba(51,130,137,.20) 0%,rgba(51,130,137,.10) 38%,rgba(51,130,137,.035) 58%,transparent 74%)",
                 animation: "auroraB 41s ease-in-out infinite",
               }}
             />

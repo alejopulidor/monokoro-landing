@@ -450,8 +450,16 @@
     left: -10%;
     top: -30%;
     border-radius: 50%;
-    filter: blur(70px);
-    background: radial-gradient(circle, rgba(106, 221, 155, 0.34), transparent 68%);
+    /* No `filter: blur()` — see the note in components/site/aurora.tsx. These
+       also sit inside `[data-panel]`, which `panels()` scales on scroll, and
+       scaling an ancestor of a blurred element re-rasterises the blur as well. */
+    background: radial-gradient(
+      circle,
+      rgba(106, 221, 155, 0.36) 0%,
+      rgba(106, 221, 155, 0.18) 36%,
+      rgba(106, 221, 155, 0.06) 56%,
+      transparent 74%
+    );
     animation: auroraA 24s ease-in-out infinite;
     pointer-events: none;
   }
@@ -462,8 +470,13 @@
     right: -12%;
     bottom: -34%;
     border-radius: 50%;
-    filter: blur(80px);
-    background: radial-gradient(circle, rgba(51, 130, 137, 0.46), transparent 70%);
+    background: radial-gradient(
+      circle,
+      rgba(51, 130, 137, 0.48) 0%,
+      rgba(51, 130, 137, 0.24) 38%,
+      rgba(51, 130, 137, 0.08) 58%,
+      transparent 76%
+    );
     animation: auroraB 31s ease-in-out infinite;
     pointer-events: none;
   }

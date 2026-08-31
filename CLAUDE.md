@@ -352,6 +352,42 @@ and silently miss the thirteenth.
 of applying its fill. Every one of the twelve was checked individually for where
 it parks.
 
+### Scroll smoothness — the aurora was the whole problem
+
+Reported as "no corre a 60fps, va saltando". Bisected on `/es/` at 1418×802 by
+scrolling with real wheel events and turning one suspect off at a time with
+`!important` overrides (`[data-panel] { transform: none !important }` disables a
+GSAP tween's effect without needing access to GSAP, because `!important` in a
+stylesheet outranks the inline style GSAP writes — that is what makes a bisect
+possible on a loaded page with no rebuild):
+
+| scenario | fps | p95 | worst frame | stutters | long tasks |
+| --- | --- | --- | --- | --- | --- |
+| baseline | 46.8 | 44ms | **318ms** | 26 | 6 |
+| no aurora at all | 59.5 | 24ms | 46ms | 4 | 0 |
+| no `filter` anywhere | 58.6 | 23ms | 58ms | 8 | 2 |
+| no parallax tween | 57.8 | 26ms | 163ms | 5 | 2 |
+
+Both top results point at one thing: **the aurora blobs were ~800px elements
+with `filter: blur(90–104px)` running an infinite `transform` animation that
+includes `scale(1.25)`. Animating a transform on a filtered element
+re-rasterises the blur every frame, at a growing size.** They pre-dated the GSAP
+work; Lenis just turned every dropped frame into visible jank instead of a
+stutter you would blame on the mouse.
+
+The fix is to delete the filter, not the blobs: a radial gradient is already a
+soft falloff, so extra colour stops do the same smoothing for free and the
+transform animation then runs on the compositor. After it, **baseline is 60 fps,
+p95 17.2ms, worst frame 18ms, zero late frames, zero long tasks** — identical to
+the "no filters at all" scenario, i.e. nothing measurable is left.
+
+So: **never animate a transform on an element that carries a `filter`, and never
+scale an ancestor of one.** `panels()` scales `[data-panel]`, which contains
+`.mk-aur-a` / `.mk-aur-b`; that combination was part of the same cost. The
+remaining filters on the site (`backdrop-blur` on the nav and the quoter, the
+card's drop shadow) measured free, because nothing animates a transform on or
+above them.
+
 ### Two traps that will cost an afternoon
 
 - **`overflow-x: hidden` kills `position: sticky` on every descendant.** It

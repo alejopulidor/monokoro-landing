@@ -111,15 +111,13 @@ export function MotionProvider() {
        * feedback loop needs. The wiring above stays synchronous — a starved
        * frame then costs a stale measurement, never an unanimated page.
        */
-      let refreshQueued = false;
+      let refreshRaf = 0;
       const queueRefresh = () => {
-        if (refreshQueued) return;
-        refreshQueued = true;
-        const f = requestAnimationFrame(() => {
-          refreshQueued = false;
+        if (refreshRaf) return;
+        refreshRaf = requestAnimationFrame(() => {
+          refreshRaf = 0;
           ScrollTrigger.refresh();
         });
-        frames.push(f);
       };
 
       const sync = () => {
@@ -190,6 +188,7 @@ export function MotionProvider() {
 
       return () => {
         mo.disconnect();
+        if (refreshRaf) cancelAnimationFrame(refreshRaf);
         frames.forEach(cancelAnimationFrame);
         offs.forEach((off) => off());
         unclaim(keys);

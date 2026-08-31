@@ -181,11 +181,31 @@ export function WhatsappDemo() {
       </div>
 
       {/* ── Messages ────────────────────────────────────────────────── */}
+      {/*
+        **Fixed height, anchored to the bottom, clipped.** It was
+        `min-h-[405px] flex-1`, so when the last two messages arrived the content
+        outgrew the minimum and the whole card jumped taller — a layout shift in
+        the middle of the hero, which is the worst place for one.
+
+        A real chat does not resize: it has a viewport, new messages arrive at
+        the bottom and old ones leave through the top. `justify-end` plus
+        `overflow-hidden` is exactly that, and it makes this card's height a
+        constant, so nothing below it can move either.
+
+        Losing the earliest bubbles off the top is the intended behaviour, not a
+        compromise — the newest message is the one being read.
+      */}
       <div
-        className="flex min-h-[405px] flex-1 flex-col gap-2 px-3 py-[15px]"
+        className="flex h-[430px] flex-col justify-end gap-2 overflow-hidden px-3 py-[15px]"
         style={{
           backgroundImage: "radial-gradient(rgba(44,122,128,.10) 1px,transparent 1px)",
           backgroundSize: "18px 18px",
+          // Fades the top edge so the oldest bubble leaving the viewport reads
+          // as intended rather than as a clipping bug. Static, so it rasterises
+          // once — unlike the blurs this page had, which were re-rasterised
+          // every frame.
+          maskImage: "linear-gradient(to bottom,transparent 0,#000 22px)",
+          WebkitMaskImage: "linear-gradient(to bottom,transparent 0,#000 22px)",
         }}
       >
         {visible.map((m) => (
