@@ -321,6 +321,9 @@ function Row({
   );
 }
 
+/** "Entregado", not "acreditado", and "en tu billetera", not "saldo": the
+ *  dollars go to the customer's own wallet at the moment of the trade.
+ *  Monokoro never holds them — see the copy rules in CLAUDE.md. */
 function Receipt({ balance }: { balance: string }) {
   return (
     <div className="flex min-w-[210px] items-center gap-[11px]">
@@ -339,9 +342,9 @@ function Receipt({ balance }: { balance: string }) {
         />
       </svg>
       <div className="flex flex-col">
-        <span className="font-semibold">Acreditado</span>
+        <span className="font-semibold">Entregado</span>
         <span className="ff-m tnum text-[11.5px] tracking-[0.06em] text-[var(--color-teal)]">
-          SALDO {balance} USD
+          EN TU BILLETERA · {balance} USD
         </span>
       </div>
     </div>

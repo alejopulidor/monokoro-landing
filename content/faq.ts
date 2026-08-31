@@ -21,7 +21,7 @@ export const FAQ_ITEMS: FaqItem[] = [
   },
   {
     q: "¿Qué es exactamente un dólar digital?",
-    a: "Una moneda que siempre vale un dólar estadounidense y vive en internet. Técnicamente son USDT, la más usada del mundo, diseñada para mantener el valor de un dólar. Quedan en tu cuenta, a tu nombre.",
+    a: "Una moneda que siempre vale un dólar estadounidense y vive en internet. Técnicamente son USDT, la más usada del mundo, diseñada para mantener el valor de un dólar. Quedan en tu billetera, a tu nombre.",
   },
   {
     q: "¿Cuál es el monto mínimo?",
@@ -29,15 +29,23 @@ export const FAQ_ITEMS: FaqItem[] = [
   },
   {
     q: "¿Cómo vendo y recibo mis pesos de vuelta?",
-    a: "Igual que compraste: dices cuánto quieres vender, ves la tasa del día, confirmas y recibes los pesos en tu cuenta. Sin trámites nuevos.",
+    a: "Igual que compraste: dices cuánto quieres vender, ves la tasa del día, confirmas y recibes los pesos en tu cuenta bancaria. Sin trámites nuevos.",
   },
   {
     q: "¿Por qué la tarjeta tiene otra tasa?",
     a: "Porque incluye los costos de procesamiento internacional de la red de pagos. No es una comisión escondida: la ves antes de confirmar cada recarga.",
   },
   {
+    q: "¿Monokoro guarda mi plata?",
+    a: "No. Monokoro compra y vende: te entrega los dólares en tu billetera en el momento de la operación, y ahí termina nuestro rol sobre esos fondos. No recibimos dinero del público para mantenerlo ni administrarlo, y no somos una entidad de depósito.",
+  },
+  {
+    q: "¿Y si no tengo billetera?",
+    a: "Te ayudamos a crear una en el mismo chat, sin costo. Queda a tu nombre y con custodia compartida: tú tienes lo necesario para mover tus dólares cuando quieras, sin pedirnos permiso, y nosotros guardamos una llave de respaldo para poder acompañarte si pierdes el acceso. Con esa llave sola no podemos mover tus fondos.",
+  },
+  {
     q: "¿Qué pasa si pierdo mi celular?",
-    a: "Tus dólares no viven en el teléfono, viven en tu cuenta. Recuperas tu número, verificamos que eres tú y sigues justo donde ibas.",
+    a: "Tus dólares no viven en el teléfono: viven en tu billetera, y tú tienes el control de esa billetera. Se recupera con el respaldo que guardaste al crearla, y por eso ese es el paso que más insistimos que no te saltes. Si perdiste el acceso, escríbenos y te acompañamos en lo que podamos.",
   },
   {
     q: "¿Necesito descargar algo?",

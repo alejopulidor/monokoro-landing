@@ -1,7 +1,7 @@
 {
   "meta": {
     "title": "Monokoro — Ahorra en dólares digitales desde WhatsApp | Colombia",
-    "description": "Compra, guarda y gasta dólares digitales desde WhatsApp. Una sola tasa, sin comisiones aparte, acreditación en minutos y tarjeta para pagar en dólares."
+    "description": "Compra y vende dólares digitales desde WhatsApp. Te los entregamos al momento en tu propia billetera, con una sola tasa y sin comisiones aparte. Si no tienes billetera, te ayudamos a crearla."
   },
 
   "languageSwitcher": {
@@ -21,7 +21,7 @@
       {
         "h": "1. Quiénes somos",
         "p": [
-          "Estos términos regulan el uso de monokoro.co y del servicio de compra, venta y custodia de dólares digitales que Monokoro presta a través de WhatsApp y de su plataforma (en adelante, el “Servicio”).",
+          "Estos términos regulan el uso de monokoro.co y del servicio de compra y venta de dólares digitales, con entrega inmediata a la billetera del cliente, que Monokoro presta a través de WhatsApp y de su plataforma (en adelante, el “Servicio”).",
           "Al escribirnos para operar, aceptas estos términos en su totalidad."
         ],
         "kv": [
@@ -34,12 +34,14 @@
       {
         "h": "2. Qué es y qué no es el Servicio",
         "p": [
-          "Monokoro es una plataforma de tecnología. No es un banco, no es una entidad de depósito y no capta ahorro del público."
+          "Monokoro es una plataforma de tecnología que intermedia la compra y venta de dólares digitales. No es un banco, no es una entidad de depósito, no custodia recursos de terceros y no realiza captación de dineros del público en ninguna de sus modalidades.",
+          "El dinero que recibe Monokoro corresponde al precio de una operación de compraventa concreta, ya cotizada y aceptada por el cliente, y se ejecuta contra la entrega inmediata de los dólares digitales. Monokoro no recibe ni mantiene fondos de clientes por fuera de esa operación."
         ],
         "ul": [
           "WhatsApp es únicamente el canal de atención. La verificación de identidad, el pago y la entrega de los dólares digitales ocurren sobre nuestra infraestructura.",
-          "Los dólares digitales que compras quedan a tu nombre y bajo tu control. No los prestamos ni los usamos para operar la compañía.",
-          "Los saldos en activos digitales no son depósitos y no están cubiertos por un seguro de depósitos.",
+          "Los dólares digitales se entregan en la billetera del cliente en el momento de la operación. Quedan a su nombre y bajo su control; Monokoro no los guarda, no los administra, no los presta y no los usa para operar la compañía.",
+          "Si el cliente no tiene billetera, Monokoro puede ayudarle a crear una con custodia compartida. En ese esquema el cliente conserva por sí solo la capacidad de disponer de sus dólares digitales, y la llave que conserva Monokoro sirve únicamente para apoyar la recuperación del acceso: por sí sola no permite a Monokoro disponer de los fondos.",
+          "Los activos digitales del cliente no son depósitos, no constituyen captación y no están cubiertos por un seguro de depósitos.",
           "El Servicio no ofrece rendimientos, asesoría financiera ni recomendación de inversión."
         ]
       },
@@ -115,7 +117,7 @@
       {
         "h": "10. Cambios, terminación y ley aplicable",
         "p": [
-          "Publicaremos cualquier modificación de estos términos en esta página con su fecha de actualización. Puedes dejar de usar el Servicio en cualquier momento vendiendo o retirando tu saldo.",
+          "Publicaremos cualquier modificación de estos términos en esta página con su fecha de actualización. Puedes dejar de usar el Servicio en cualquier momento: tus dólares digitales ya están en tu billetera y no dependen de que sigas siendo cliente.",
           "Estos términos se rigen por la ley colombiana. Para cualquier asunto relacionado con ellos:"
         ],
         "contact": {

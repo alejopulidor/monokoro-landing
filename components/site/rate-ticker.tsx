@@ -19,7 +19,7 @@ export function RateTicker() {
     `VENTA $ ${fmtCOP(RATE_SELL)} COP/USD`,
     `TARJETA $ ${fmtCOP(RATE_CARD)} COP/USD`,
     `DESDE $ ${fmtCOP(MIN_AMOUNT_COP)} COP`,
-    "ACREDITACIÓN EN MINUTOS",
+    "ENTREGA AL MOMENTO",
     "SOPORTE HUMANO 7 DÍAS",
   ];
 

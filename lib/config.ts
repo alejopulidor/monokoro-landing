@@ -73,7 +73,7 @@ export const SOCIAL_URLS: string[] = [];
  * TODO(business): see "Analytics" in CLAUDE.md for how to create either one.
  */
 export const GTM_ID = "";
-export const GA4_ID = "";
+export const GA4_ID = "G-DGPYL9J23P";
 
 // ─── Dates ────────────────────────────────────────────────────────────────
 export const LEGAL_LAST_UPDATED_ISO = "2026-08-30";

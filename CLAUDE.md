@@ -8,9 +8,19 @@
 
 ## What this site is
 
-Monokoro sells **dólares digitales (USDT) por WhatsApp** in Colombia: you quote, confirm the rate and receive in minutes, then spend from a card denominated in dollars. WhatsApp is the *support channel only* — verification, payment and delivery happen on Monokoro's own infrastructure. That distinction appears in the copy, the FAQ, the trust section and the terms, and it is not a slogan: it is the compliance position. Don't blur it.
+Monokoro **buys and sells dólares digitales (USDT) por WhatsApp** in Colombia. The customer quotes, confirms the rate, pays — and the dollars are delivered **at that moment, into the customer's own wallet**. Whoever does not have a wallet gets help creating one with **shared custody**. That is the whole business, and the wallet help is the differentiator.
 
-It is **not** a bank, **not** a deposit-taking institution, and the site never says or implies otherwise.
+### The three claims the site must never get wrong
+
+They are a compliance position, not marketing, and the specific Colombian risk they exist to avoid is **captación de dineros del público** (a criminal offence, not a fine).
+
+1. **Monokoro does not custody client funds.** It intermediates a purchase and delivers. The money it receives is the price of one concrete, already-quoted trade, executed against immediate delivery — never funds held on someone's behalf. Never write "custodia" as something Monokoro does *to the client's dollars*.
+2. **The dollars live in the customer's wallet, not in an account with Monokoro.** Write *billetera*, never *tu cuenta* — "cuenta" reads as an account Monokoro maintains, which is exactly the impression that must not exist. (`tu cuenta bancaria`, for the pesos leg of a sale, is fine and should say "bancaria".)
+3. **In the shared-custody wallet, the customer can move the funds alone.** Monokoro holds a backup key that supports recovery and, by itself, cannot move anything. Say both halves or neither — half of it is misleading in either direction.
+
+WhatsApp is the *support channel only*: verification, payment and delivery happen on Monokoro's own infrastructure. It is **not** a bank and **not** a deposit-taking institution.
+
+**Unresolved:** nobody has confirmed how recovery actually works with the wallet provider, so the "¿Qué pasa si pierdo mi celular?" answer deliberately promises nothing — it points at the backup the customer saved and offers to help. Do not upgrade it into a guarantee until someone can state the mechanism. The word *ahorra* in the hero headline is the design's and is kept, but it is worth a look from counsel: "ahorro" is a loaded term next to captación.
 
 ## Stack
 
@@ -141,25 +151,28 @@ Social title and description are free to **diverge from `<title>` / `meta descri
 
 ## Analytics
 
-`GTM_ID` and `GA4_ID` live in `lib/config.ts`, both empty. **While both are empty nothing is injected** — no script, no cookie, no request. Set one, not both: GTM can host the GA4 tag itself, and loading GA4 twice double-counts every pageview.
+`GTM_ID` and `GA4_ID` live in `lib/config.ts`. **Currently `GA4_ID` is set (`G-DGPYL9J23P`) and `GTM_ID` is empty** — gtag.js loads directly and there is no Tag Manager container. Set one or the other, never both: GTM hosts the GA4 tag itself, and loading GA4 twice double-counts every pageview. Emptying both switches analytics off entirely — no script, no cookie, no request.
+
+Going through GTM later is worth it the day a second tool arrives (Meta Pixel, Google Ads): move the `G-` id into a GTM Google Tag, put the `GTM-` id in `GTM_ID`, and clear `GA4_ID`. Nothing else in the code changes — `analytics-events.tsx` already pushes to `dataLayer` as well as calling `gtag`.
 
 - `components/site/analytics.tsx` — the tags. Plain inline `<script>`, not `next/script`: `afterInteractive` only injects after hydration, which on a static export means the tag misses every visitor who leaves before React boots.
 - `components/site/analytics-events.tsx` — **the part that actually matters here.** This site has exactly one conversion, opening WhatsApp, and it happens by *leaving the page*, so a pageview-only setup measures none of it. One delegated listener catches every `a[href*="wa.me"]` click and fires `whatsapp_click`. It listens in the **capture** phase: by the bubble phase the browser may already be tearing the page down and the beacon never leaves.
 
 The event is sent twice because the two destinations read it differently — GTM listens on `dataLayer`, while gtag.js needs a real `gtag('event', …)` call and ignores a bare push.
 
-### Setting it up in the Google console (GTM route, the one Tenko uses)
+### What is done, and what is left in the console
 
-1. tagmanager.google.com → create an account for Monokoro, container type **Web**, container name `monokoro.co`. Copy the `GTM-XXXXXXX`.
-2. analytics.google.com → create a GA4 property, add a **Web** data stream for `https://monokoro.co`. Copy the `G-XXXXXXXXXX`.
-3. GTM → **Tags → New → Google Tag**, paste the `G-` id, trigger **Initialization – All Pages**.
-4. GTM → **Triggers → New → Custom Event**, event name exactly `whatsapp_click`.
-5. GTM → **Tags → New → Google Analytics: GA4 Event**, event name `whatsapp_click`, that trigger. Add event parameters `link_text`, `link_url`, `page_path` from Data Layer Variables of the same names (create them under **Variables** first).
-6. **Preview**, click a CTA, confirm the event fires — then **Submit**.
-7. GA4 → **Admin → Events → Mark as key event** on `whatsapp_click`. That is the conversion.
-8. Put the `GTM-` id in `lib/config.ts` and deploy.
+Done: the GA4 property and its web data stream exist, and `GA4_ID` is set. The tag ships and `whatsapp_click` fires with `link_text`, `link_url` and `page_path`.
 
-Worth doing once, alongside: Search Console → add `https://monokoro.co` as a **Domain** property, verify by DNS TXT, submit `https://monokoro.co/sitemap.xml`.
+Left, all inside analytics.google.com and none of it in code:
+
+1. **Admin → Events**, wait for `whatsapp_click` to appear (up to 24 h after the first real click), then **Mark as key event**. Until this, the conversion is not counted.
+2. **Admin → Custom definitions → Create custom dimension**: name `CTA`, scope **Event**, parameter `link_text`. Without it every click looks the same and you cannot tell the hero CTA from the pricing one. GA4 only collects from the moment the dimension exists — it does not backfill.
+3. **Admin → Data streams → the stream → Configure tag settings → Show all → Define internal traffic**, and add your own IP so your testing does not inflate the numbers.
+4. **Admin → Data retention** → set event data to **14 months**. The default of 2 months is short enough to lose a year-over-year comparison before you ever make one.
+5. **DebugView** (Admin → DebugView) with the GA Debugger extension on: click a CTA and confirm the three parameters arrive filled, not empty.
+
+Search Console, worth doing once alongside: add `https://monokoro.co` as a **Domain** property, verify by DNS TXT, submit `https://monokoro.co/sitemap.xml`, then link it to GA4 under **Admin → Product links**.
 
 **Consent is unresolved.** The privacy policy tells the reader they can reject cookies, and there is no banner. Reconcile the two before launch — either add a banner (and switch the tags to Consent Mode v2 defaults) or amend the policy.
 
@@ -213,7 +226,7 @@ Ordered by how much damage each does if it ships as-is.
 3. **Legal identity** — `messages/es.json` has "razón social por confirmar", "Domicilio: Por confirmar", "Identificación fiscal: Por confirmar" in both documents. Counsel has not reviewed either; they are a structured first draft, not advice.
 4. **Emails** (`hola@`, `legal@`, `privacidad@` at monokoro.co) are assumed, not confirmed.
 5. **`SITE_URL`** is `https://monokoro.co`, taken from the canvas's canonical tag. Confirm.
-6. **No analytics id.** `GTM_ID` / `GA4_ID` in `lib/config.ts` are empty, so no tag ships. The code and the `whatsapp_click` conversion are already in place — see "Analytics" for the console steps.
+6. **`whatsapp_click` is not yet a key event in GA4.** The tag ships and the event fires, but until it is marked as a key event and `link_text` is registered as a custom dimension, the conversion is not counted and you cannot tell which CTA produced it. See "Analytics".
 7. **No consent banner**, while the privacy policy says cookies can be rejected. This becomes a real problem the moment an analytics id is set.
 8. **`SOCIAL_URLS` is empty**, so `sameAs` is omitted from the schema. Add the real profiles when they exist; an empty or invented `sameAs` is a broken identity claim.
 9. **The OG cards have `MONOKORO.CO` baked into the image.** If the domain changes, re-render them with `pnpm og` — it is pixels, not a tag.

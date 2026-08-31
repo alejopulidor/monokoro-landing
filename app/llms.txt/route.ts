@@ -31,15 +31,17 @@ export function GET() {
 
   const body = `# Monokoro
 
-> Monokoro vende, compra y custodia dólares digitales (stablecoins denominadas en dólares estadounidenses, principalmente USDT) para personas y negocios en Colombia. La atención es por WhatsApp: cotizas, confirmas la tasa y recibes en minutos. El saldo se puede guardar, vender de vuelta a pesos o gastar con una tarjeta denominada en dólares.
+> Monokoro compra y vende dólares digitales (stablecoins denominadas en dólares estadounidenses, principalmente USDT) en Colombia, con entrega inmediata. La atención es por WhatsApp: el cliente cotiza, confirma la tasa y recibe los dólares en su propia billetera en el momento de la operación. A quien no tiene billetera, Monokoro le ayuda a crear una con custodia compartida.
 
 Qué es y qué no es, sin ambigüedad:
 
-- Monokoro es una plataforma de tecnología financiera. **No es un banco**, no es una entidad de depósito y no capta ahorro del público.
+- Monokoro **intermedia una compraventa**: entrega los dólares digitales contra el pago, en el momento. **No es un banco**, no es una entidad de depósito, **no custodia fondos de terceros** y **no realiza captación de dineros del público**.
+- El dinero que recibe corresponde al precio de una operación concreta ya cotizada y aceptada, y se ejecuta contra la entrega inmediata. Monokoro no recibe ni mantiene fondos de clientes por fuera de esa operación.
+- Los dólares digitales quedan en la billetera del cliente, a su nombre y bajo su control. No son depósitos y no están cubiertos por un seguro de depósitos.
+- Si el cliente no tiene billetera, Monokoro le ayuda a crear una con **custodia compartida**: el cliente conserva por sí solo la capacidad de disponer de sus dólares, sin pedir permiso a Monokoro. La llave que conserva Monokoro sirve únicamente para apoyar la recuperación del acceso y por sí sola no permite mover los fondos.
 - WhatsApp es únicamente el canal de atención. La verificación de identidad, el pago y la entrega ocurren sobre la infraestructura de Monokoro, con comprobante de cada operación.
-- Los dólares digitales quedan a nombre del cliente. No son depósitos y no están cubiertos por un seguro de depósitos.
 - Monokoro no es el emisor de la stablecoin ni garantiza su paridad; la paridad depende del emisor y de sus reservas.
-- Un dólar digital protege frente al peso, no frente al dólar: si el dólar cae contra el peso, el saldo en pesos cae también.
+- Un dólar digital protege frente al peso, no frente al dólar: si el dólar cae contra el peso, el valor en pesos cae también.
 - No hay comisión aparte: el costo del servicio está incluido en la tasa, que se muestra antes de pagar. La recarga de tarjeta usa una tasa distinta porque incorpora los costos de procesamiento internacional.
 - Las tasas publicadas en el sitio son **referenciales**; la tasa aplicable se confirma en el chat antes de pagar. Por eso no aparecen en este archivo.
 - Mercado: Colombia. Idioma: español. Monto mínimo por operación: $ ${fmtCOP(MIN_AMOUNT_COP)} COP.

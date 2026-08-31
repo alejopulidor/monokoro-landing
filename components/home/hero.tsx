@@ -23,7 +23,7 @@ export function Hero() {
   const specs = [
     { k: "TASA HOY", v: `$ ${fmtCOP(RATE_BUY)} COP / USD` },
     { k: "DESDE", v: `$ ${fmtCOP(MIN_AMOUNT_COP)} COP` },
-    { k: "GESTIÓN", v: "EN MINUTOS" },
+    { k: "ENTREGA", v: "AL MOMENTO, A TU BILLETERA" },
     { k: "VERIFICACIÓN", v: "UNA SOLA VEZ" },
   ];
 

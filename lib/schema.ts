@@ -33,10 +33,12 @@ export const WEBSITE_ID = `${SITE_URL}/#website`;
  *     still the design's placeholder and there is no registered address yet.
  *   - no `sameAs` unless `SOCIAL_URLS` is non-empty.
  *
- * `FinancialService` is *not* claimed. Monokoro sells and custodies digital
- * dollars through a chat channel; asserting a regulated service type it does
- * not hold a licence for is a compliance problem, not an SEO trick. Revisit
- * when the licensing position is settled.
+ * `FinancialService` is *not* claimed, and neither is custody. Monokoro buys
+ * and sells digital dollars and delivers them to the customer's own wallet;
+ * it does not hold client funds. Asserting a regulated service type — custody,
+ * deposit-taking — without the licence is a compliance problem, not an SEO
+ * trick, and in Colombia the specific risk is *captación*. Revisit only when
+ * the licensing position actually changes.
  */
 export function organizationSchema(locale: Locale, description: string) {
   return {
@@ -76,7 +78,7 @@ export function serviceSchema(locale: Locale) {
     "@id": `${SITE_URL}/#service`,
     name: "Compra y venta de dólares digitales",
     description:
-      "Compra, venta y custodia de dólares digitales con atención por WhatsApp y tarjeta para gastar en dólares.",
+      "Compra y venta de dólares digitales con atención por WhatsApp y entrega inmediata a la billetera del cliente. Monokoro no custodia fondos de terceros; a quien no tiene billetera, le ayuda a crear una con custodia compartida.",
     provider: { "@id": ORG_ID },
     areaServed: { "@type": "Country", name: "Colombia" },
     url: `${SITE_URL}/${locale}/`,

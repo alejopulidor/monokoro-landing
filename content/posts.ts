@@ -146,7 +146,7 @@ export const POSTS: Post[] = [
       {
         t: "note",
         tag: "CÓMO LO HACEMOS",
-        x: "En Monokoro la tasa que ves ya incluye todo, la verificación se hace una sola vez y cada operación queda con comprobante. La atención es por WhatsApp, con un agente que responde en minutos.",
+        x: "En Monokoro la tasa que ves ya incluye todo, la verificación se hace una sola vez y cada operación queda con comprobante. Los dólares se entregan al momento en tu propia billetera —no los guardamos nosotros— y si no tienes una, te ayudamos a crearla con custodia compartida.",
       },
       { t: "h2", x: "Cómo se compra, paso a paso" },
       {
@@ -165,7 +165,7 @@ export const POSTS: Post[] = [
           {
             n: "03",
             t: "Recibes y decides.",
-            d: "Los dólares quedan en tu cuenta. Los guardas, los vendes de vuelta o los gastas con la tarjeta.",
+            d: "Los dólares quedan al momento en tu billetera, a tu nombre. Los guardas, los vendes de vuelta o los gastas con la tarjeta.",
           },
         ],
       },

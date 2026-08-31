@@ -37,8 +37,9 @@ export function Transparency() {
               los mueves en minutos y los vendes cuando quieras volver a pesos.
             </p>
             <p className="lede">
-              Con Monokoro los recibes en tu cuenta y decides: los dejas
-              guardados, los gastas con tarjeta o los vendes de vuelta.
+              Con Monokoro los recibes al momento en tu propia billetera. Desde
+              ahí decides: los dejas guardados, los gastas con tarjeta o los
+              vendes de vuelta. ¿No tienes billetera? Te ayudamos a crearla.
             </p>
             <Link
               href={postHref("que-es-un-dolar-digital")}
@@ -61,9 +62,9 @@ export function Transparency() {
               ¿De quién son los dólares?
             </h3>
             <p className="text-[16.5px] leading-[1.6] text-[var(--color-muted)] text-pretty">
-              Tuyos. Tú los compras, nosotros te los entregamos. No le estás
-              prestando tu plata a nadie: decides cuándo guardarlos, gastarlos o
-              venderlos de vuelta.
+              Tuyos. Tú los compras, nosotros te los entregamos en tu billetera y
+              ahí termina nuestro rol sobre esos fondos. Monokoro no los guarda ni
+              los administra: no le estás prestando tu plata a nadie.
             </p>
             <p className="border-t border-[rgba(13,46,51,0.1)] pt-4 text-[15px] leading-[1.6] text-[var(--color-faint)] text-pretty">
               Técnicamente son USDT, la moneda digital más usada del mundo,
@@ -96,6 +97,24 @@ export function Transparency() {
               WhatsApp es el canal de atención. La verificación, el pago y la
               entrega ocurren sobre nuestra infraestructura, con comprobante de
               cada operación.
+            </p>
+          </div>
+
+          <div className="rv card flex flex-col gap-4 p-[clamp(26px,3vw,38px)]">
+            <div className="ff-m text-[11px] tracking-[0.12em] text-[var(--color-teal)]">
+              SI NO TIENES BILLETERA
+            </div>
+            <h3 className="text-[clamp(22px,2.8vw,29px)] font-semibold leading-[1.13] tracking-[-0.03em]">
+              Te ayudamos a crear una
+            </h3>
+            <p className="text-[16.5px] leading-[1.6] text-[var(--color-muted)] text-pretty">
+              Sin costo y en el mismo chat. Queda a tu nombre, con custodia
+              compartida: tú tienes lo necesario para mover tus dólares cuando
+              quieras, sin pedirnos permiso.
+            </p>
+            <p className="border-t border-[rgba(13,46,51,0.1)] pt-4 text-[15px] leading-[1.6] text-[var(--color-faint)] text-pretty">
+              Nosotros guardamos una llave de respaldo para poder acompañarte si
+              pierdes el acceso. Con ella sola no podemos mover tus fondos.
             </p>
           </div>
         </div>

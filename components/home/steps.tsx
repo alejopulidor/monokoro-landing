@@ -13,8 +13,8 @@ const STEPS = [
   },
   {
     n: "03",
-    t: "Recibe y usa",
-    d: "Tus dólares quedan en tu cuenta. Guárdalos, véndelos o gástalos con tu tarjeta.",
+    t: "Recibe en tu billetera",
+    d: "Te los entregamos al momento en tu billetera, a tu nombre. Guárdalos, véndelos o gástalos con tu tarjeta.",
   },
 ];
 
