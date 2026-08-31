@@ -194,12 +194,19 @@ export function BizApiAccess() {
 }
 
 /**
- * "Un saldo por frente, y las tarjetas que hagan falta."
+ * "Varias tarjetas gastando de un mismo saldo."
  *
  * The two-column shape `BizBrand` uses: something drawn on the left, the
  * reasons on the right. The drawing is the argument here -- "varias tarjetas
  * consumen del mismo saldo" is one of those claims a diagram settles in a
  * second and a paragraph never quite does.
+ *
+ * **Read the docblock on `BIZ_POCKETS` before touching any of this copy.** The
+ * first version defined a bolsillo from the amount ("un monto reservado del
+ * saldo") and the client could not tell what it did or why he would want it.
+ * The concept is the container and the cards wired to it; the amount is just
+ * what you put in. The panel below therefore labels the *relationship*, not
+ * only the parts.
  *
  * The figure is a **mock**, and it is labelled as one twice: `SALDO DE EJEMPLO`
  * on the panel and again inside the `aria-label`. Same rule as `CardFace`'s
@@ -213,15 +220,15 @@ export function BizPockets() {
       <div className="shell">
         <SectionHead
           eyebrow="BOLSILLOS"
-          title="Un saldo por frente, y las tarjetas que hagan falta."
-          lede="Un bolsillo es un monto reservado del saldo del negocio, y varias tarjetas consumen del mismo. El gasto de pauta queda separado del de proveedores sin que tengas que repartir montos tarjeta por tarjeta."
+          title="Varias tarjetas gastando de un mismo saldo."
+          lede="Un bolsillo es un saldo con tarjetas conectadas: le pones un monto, eliges cuáles tarjetas gastan de ahí y todas consumen del mismo. Recargas en un solo lugar, y entre todas no pueden gastar más de lo que hay en el bolsillo."
         />
 
         <div className="mt-[clamp(30px,4vw,46px)] flex flex-wrap gap-5">
           <div
             className="rv panel-flat flex min-w-0 flex-[1_1_320px] flex-col self-start p-[clamp(26px,3.4vw,38px)]"
             role="img"
-            aria-label="Ejemplo de un bolsillo llamado Pauta con un saldo de ejemplo de 4.500,00 dólares, del que consumen tres tarjetas: Meta Ads terminada en 4821, TikTok Ads terminada en 7302 y Google Ads terminada en 5140."
+            aria-label="Ejemplo de un bolsillo llamado Pauta con un saldo de ejemplo de 4.500,00 dólares. Tiene tres tarjetas conectadas que gastan de ese mismo saldo: Meta Ads terminada en 4821, TikTok Ads terminada en 7302 y Google Ads terminada en 5140."
           >
             <div className="ff-m text-[11px] tracking-[0.14em] text-[var(--color-mint)]">
               BOLSILLO · PAUTA
@@ -234,13 +241,17 @@ export function BizPockets() {
               SALDO DE EJEMPLO
             </div>
 
-            <SpecList
-              items={BIZ_POCKET_CARDS}
-              className="mt-[clamp(22px,3vw,30px)]"
-            />
+            <div className="ff-m mt-[clamp(24px,3vw,32px)] flex items-baseline justify-between gap-4 text-[10.5px] tracking-[0.14em] text-[rgba(239,246,240,0.62)]">
+              <span>TARJETAS CONECTADAS</span>
+              <span className="tnum text-[var(--color-mint)]">
+                {BIZ_POCKET_CARDS.length}
+              </span>
+            </div>
+
+            <SpecList items={BIZ_POCKET_CARDS} className="mt-3" />
 
             <div className="ff-m mt-4 text-[10.5px] tracking-[0.14em] text-[rgba(239,246,240,0.5)]">
-              TRES TARJETAS · UN SOLO SALDO
+              LAS TRES GASTAN DE ESTE SALDO
             </div>
           </div>
 
@@ -276,7 +287,7 @@ export function BizPanel() {
         <SectionHead
           eyebrow="ADMINISTRACIÓN"
           title="Todo lo que pasa por el chat, también lo ves en un panel."
-          lede="El chat sigue siendo lo más rápido para crear o congelar una tarjeta. El panel es donde tu equipo lo ve todo junto: cada tarjeta, cada bolsillo y cada movimiento."
+          lede="El chat sigue siendo lo más rápido para crear o congelar una tarjeta. El panel es donde tu equipo lo ve todo junto: cada tarjeta, cada bolsillo con sus tarjetas conectadas, y cada movimiento."
         />
         <CardGrid items={BIZ_PANEL} min={240} className="mt-[clamp(32px,4vw,48px)]" />
       </div>

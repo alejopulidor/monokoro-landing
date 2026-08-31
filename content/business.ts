@@ -84,7 +84,7 @@ export const BIZ_FLOW: FlowStep[] = [
   },
   {
     k: "BOLSILLOS",
-    d: "Divides el saldo por campaña, cliente o proveedor. Varias tarjetas pueden consumir del mismo.",
+    d: "Conectas varias tarjetas a un mismo saldo: uno para pauta, uno para un cliente, uno para proveedores.",
     dot: "#338289",
   },
   {
@@ -166,14 +166,22 @@ export const BIZ_CASES: RuledItem[] = [
 ];
 
 /**
- * Bolsillos: the balance is divided, not the cards.
+ * Bolsillos.
  *
- * The framing matters and is easy to get backwards. This page's pitch is "una
- * tarjeta por campaña, por cliente, por proveedor" — so a bolsillo must never
- * read as a *replacement* for that. It is the other axis: many cards, one
- * reserved amount behind them. Write it as "el saldo se separa por frente" and
- * the two claims reinforce each other; write it as "un bolsillo por campaña en
- * vez de una tarjeta por campaña" and they fight.
+ * **Define it from the cards, not from the balance.** The first version opened
+ * with "un monto reservado del saldo del negocio", and the client's reaction was
+ * that neither the feature nor the point came across. He described it himself as
+ * "un lugar donde puedo conectar varias tarjetas" — so the container and the
+ * connecting *are* the concept, and the amount is only what you put in it. Lead
+ * with the balance and the reader has to work backwards to what it is for.
+ *
+ * The word **"frente"** was in that first version too ("un saldo por frente")
+ * and it was invented here — nobody calls it that. Name the concrete things
+ * instead: por campaña, por cliente, por proveedor, por equipo.
+ *
+ * It must also never read as a *replacement* for "una tarjeta por campaña",
+ * which is what the rest of the page sells. It is the other axis: the cards stay
+ * as many as you need, and a bolsillo is what they draw from.
  *
  * And a bolsillo is a division of the business's own balance — see the file
  * header on why it is never a *cuenta*.
@@ -181,28 +189,35 @@ export const BIZ_CASES: RuledItem[] = [
 export const BIZ_POCKETS: GridItem[] = [
   {
     n: "01",
-    t: "Un bolsillo por frente",
-    d: "Uno para pauta, uno para proveedores, uno por cliente. El gasto queda separado desde el origen, no al final del mes.",
+    t: "Recargas el bolsillo, no cada tarjeta",
+    d: "Un solo movimiento y todas las tarjetas conectadas tienen con qué gastar. Se acabó repartir montos una por una.",
   },
   {
     n: "02",
-    t: "Varias tarjetas, un solo saldo",
-    d: "Todas las tarjetas del frente consumen del mismo bolsillo, así que no tienes que repartir montos tarjeta por tarjeta.",
+    t: "El tope lo pone el bolsillo",
+    d: "Entre todas las tarjetas conectadas no pueden gastar más de lo que hay ahí. Subes o bajas el monto cuando quieras.",
   },
   {
     n: "03",
-    t: "Hecho para pauta",
-    d: "Si una tarjeta se quema a mitad de campaña, creas otra y sigue consumiendo del mismo bolsillo. La campaña no se detiene.",
+    t: "Si una tarjeta se quema, el bolsillo sigue",
+    d: "Creas otra, la conectas al mismo bolsillo y la campaña no se detiene ni pierde el saldo que quedaba.",
   },
   {
     n: "04",
-    t: "Solo se gasta lo que pusiste",
-    d: "Tú decides cuánto entra a cada bolsillo, y eso es todo lo que puede salir por ahí. El resto del saldo no se toca.",
+    t: "El gasto ya viene agrupado",
+    d: "Cada bolsillo tiene su propio historial: lo de pauta no se mezcla con lo de proveedores ni con lo de un cliente.",
   },
 ];
 
 /**
- * The example bolsillo drawn in that section: three cards, one balance.
+ * The example bolsillo drawn in that section: three cards wired to one
+ * balance.
+ *
+ * The first version listed the cards under the figure with no label, and a
+ * list of cards beside an amount does not say they are *connected* to it —
+ * which was exactly the part that did not land. The panel now names the
+ * relationship twice, as a heading over the list and as a line under it,
+ * because that relationship is the whole concept.
  *
  * Marked as an example in the copy *and* in the panel's `aria-label`, the same
  * way `CardFace` handles its own mock balance. A figure on this site that is
@@ -245,7 +260,7 @@ export const BIZ_COMPARE: CompareRow[] = [
   { k: "Cobros en dólares", a: "Conversión y recargo", b: "Se pagan en dólares" },
   { k: "Si una se quema", a: "Reposición y espera", b: "Creas otra al instante" },
   { k: "Saldo entre campañas", a: "En pesos, se devalúa", b: "En dólares, a tu nombre" },
-  { k: "Separar el gasto", a: "Otra cuenta, si el banco la abre", b: "Un bolsillo por frente" },
+  { k: "Separar el gasto", a: "Otra cuenta, si el banco la abre", b: "Un bolsillo por campaña o cliente" },
   { k: "Tu marca en la tarjeta", a: "No aplica", b: "Cobrandeada" },
   { k: "Integración", a: "Archivos y conciliación manual", b: "API y webhooks" },
 ];

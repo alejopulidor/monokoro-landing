@@ -565,11 +565,19 @@ be misread into a claim the site must not make.
   card. Calling the second one a billetera would suggest Monokoro's dollars sit
   in Apple's or Google's custody, which is wrong twice over. The site names
   those two products in English and never translates them.
-- **A "bolsillo" is a division of the business's balance, and nothing else.**
-  Not a *cuenta*, not a *sub-cuenta*, not something Monokoro holds — all three
+- **A "bolsillo" is a balance with cards connected to it.** Define it from the
+  cards outward — that is how the client describes it ("un lugar donde puedo
+  conectar varias tarjetas"), and the first version of `#bolsillos` defined it
+  from the amount instead ("un monto reservado del saldo") and had to be
+  rewritten because neither the feature nor the benefit came across. It also
+  invented the word **"frente"** ("un saldo por frente"), which nobody uses; say
+  por campaña, por cliente, por proveedor, por equipo.
+  It is still, in compliance terms, a division of the business's *own* balance:
+  not a *cuenta*, not a *sub-cuenta*, not something Monokoro holds — all three
   describe exactly the arrangement claim 2 above exists to deny. Nothing moves
   when a bolsillo is created; only the way the business reads its own balance
-  does.
+  does. And it never replaces "una tarjeta por campaña", which the rest of
+  `/negocios` sells — it is the other axis.
 
 ### Two places a qualifier goes, and neither is an asterisk
 

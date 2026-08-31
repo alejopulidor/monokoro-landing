@@ -138,7 +138,7 @@ export const BUSINESS_FAQ_ITEMS: FaqItem[] = [
   },
   {
     q: "¿Qué es un bolsillo?",
-    a: "Un monto reservado dentro del saldo del negocio del que consumen varias tarjetas a la vez. Sirve para separar pauta, proveedores o clientes sin abrir nada nuevo: el saldo sigue en la billetera de la empresa.",
+    a: "Un saldo al que conectas varias tarjetas. Le pones un monto, eliges cuáles tarjetas gastan de ahí, y recargas en un solo lugar en vez de tarjeta por tarjeta. Entre todas no pueden gastar más de lo que hay en el bolsillo, y el saldo sigue en la billetera de la empresa.",
   },
   {
     q: "¿Hay un panel además del chat?",
