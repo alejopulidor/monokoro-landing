@@ -16,7 +16,7 @@ import { GA4_ID, GTM_ID } from "@/lib/config";
  * policy tells the reader they can reject cookies. Reconcile those two before
  * launching in the EU or anywhere with an equivalent rule — either add a
  * banner (and switch these to Consent Mode v2 defaults) or amend the policy.
- * See "Pending placeholders" in CLAUDE.md.
+ * See "What is still missing" in CLAUDE.md.
  */
 
 // GTM's own snippet, verbatim except for the interpolated container id.

@@ -64,3 +64,7 @@ explícitamente) y `/llms.txt`.
 
 Todos los canvas del diseño están implementados: la landing principal, Tarjeta,
 Negocios, el blog con sus tres artículos y el 404.
+
+Lo que falta —placeholders del negocio, huecos legales y afirmaciones que
+alguien debe confirmar— está listado en [`CLAUDE.md`](./CLAUDE.md), sección
+*What is still missing*, agrupado por quién puede desbloquear cada cosa.

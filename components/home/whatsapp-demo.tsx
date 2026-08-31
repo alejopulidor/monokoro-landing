@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Link } from "@/i18n/navigation";
 import { usePrefersReducedMotion } from "@/lib/use-prefers-reduced-motion";
 import { Arrow, MonokoroMark } from "@/components/site/brand";
 import { fmtClock, fmtCOP, fmtUSD } from "@/lib/format";
@@ -351,21 +352,18 @@ function Receipt({ balance }: { balance: string }) {
   );
 }
 
-/**
- * The closing bubble offers the card. Its page is not built yet, so it points
- * at WhatsApp instead of a dead route — see `lib/nav.ts`. Swap the href for
- * `/tarjeta` in the same commit that flips that flag.
- */
+/** The closing bubble hands the reader to the card page. `Link`, not `<a>`:
+ *  a raw internal href loses the `/es/` prefix and 404s. */
 function CardCta() {
   return (
     <div className="flex min-w-[215px] flex-col gap-[9px]">
       <span>¿Creamos tu tarjeta para gastarlos?</span>
-      <a
-        href={waLink("Hola, quiero la tarjeta Monokoro para gastar mis dólares")}
+      <Link
+        href="/tarjeta"
         className="btn bg-[var(--color-ink)] px-3.5 py-2.5 text-[13.5px] text-[var(--color-onDark)] transition-colors hover:bg-[var(--color-teal)]"
       >
         Ver la tarjeta <Arrow />
-      </a>
+      </Link>
     </div>
   );
 }

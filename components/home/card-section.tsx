@@ -1,8 +1,7 @@
+import { Link } from "@/i18n/navigation";
 import { Arrow } from "@/components/site/brand";
 import { CardFace } from "@/components/shared/card-face";
 import { SpecList } from "@/components/shared/spec-list";
-import { isReady } from "@/lib/nav";
-import { waLink } from "@/lib/config";
 
 const SPECS = [
   { k: "CREACIÓN", v: "EN MINUTOS, DESDE EL CHAT" },
@@ -14,20 +13,15 @@ const SPECS = [
 /**
  * The card section.
  *
- * The design links the two CTAs at `/tarjeta` and `/negocios`. Neither page
- * exists yet, so both fall back to a WhatsApp conversation and to the quoter —
- * a link that 404s costs more trust than a slightly different CTA. `isReady`
- * reads `lib/nav.ts`, so building either page and flipping its flag restores
- * the intended links here without touching this file's markup.
+ * Both CTAs go through next-intl's `Link`. A plain `<a href="/tarjeta">` would
+ * ship without the `/es/` prefix and 404 — under `localePrefix: "always"` every
+ * internal route needs the locale, and only `Link` adds it.
  *
  * `perspective` sits on the wrapper, not on `#mk-card`: the 3D tilt written by
  * `SiteEffects` needs a perspective on an *ancestor* to read as depth. On the
  * element itself it flattens into a shear.
  */
 export function CardSection() {
-  const cardPageReady = isReady("/tarjeta");
-  const businessPageReady = isReady("/negocios");
-
   return (
     <section className="sec-lg gutter">
       <div className="mk-glow panel shell">
@@ -54,26 +48,12 @@ export function CardSection() {
             <SpecList items={SPECS} />
 
             <div className="flex flex-wrap gap-3">
-              <a
-                className="mk-mag btn btn-paper"
-                href={
-                  cardPageReady
-                    ? "/tarjeta"
-                    : waLink("Hola, quiero saber más de la tarjeta Monokoro")
-                }
-              >
+              <Link className="mk-mag btn btn-paper" href="/tarjeta">
                 Conoce la tarjeta <Arrow />
-              </a>
-              <a
-                className="mk-mag btn btn-ghost-dark"
-                href={
-                  businessPageReady
-                    ? "/negocios"
-                    : waLink("Hola, quiero tarjetas Monokoro para mi negocio")
-                }
-              >
+              </Link>
+              <Link className="mk-mag btn btn-ghost-dark" href="/negocios">
                 Tarjetas para negocios
-              </a>
+              </Link>
             </div>
           </div>
 

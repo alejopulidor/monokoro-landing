@@ -6,7 +6,8 @@
  * FAQ and the blog CTA, and they have to agree.
  *
  * Anything marked TODO is a placeholder the business has to confirm before
- * launch. See "Pending placeholders" in CLAUDE.md.
+ * launch. The full list — including the legal holes and the claims nobody has
+ * confirmed — is under "What is still missing" in CLAUDE.md.
  */
 
 // ─── Site ─────────────────────────────────────────────────────────────────
@@ -58,29 +59,29 @@ export const SOCIAL_URLS: string[] = [];
 
 // ─── Analytics ────────────────────────────────────────────────────────────
 /**
- * Leave both empty and **nothing is injected** — no script, no cookie, no
- * network request. That is the state today.
+ * **GA4 is live via `GA4_ID`; there is no Tag Manager container.**
  *
- * Use one or the other, not both: GTM can host the GA4 tag itself, and loading
- * GA4 twice double-counts every pageview.
+ * Set one or the other, never both: GTM hosts the GA4 tag itself, so two ids
+ * double-count every pageview. Emptying both switches analytics off entirely —
+ * no script, no cookie, no request.
  *
- * - `GTM_ID`  — a Google Tag Manager container, `GTM-XXXXXXX`. This is what
- *   the Tenko site uses, and the better default: tags are added in the GTM UI
- *   without a deploy.
- * - `GA4_ID`  — a GA4 measurement id, `G-XXXXXXXXXX`, loaded directly via
- *   gtag.js. Simpler if GTM is more machinery than this site needs.
+ * - `GTM_ID`  — a Tag Manager container, `GTM-XXXXXXX`. Worth moving to the day
+ *   a second tool arrives (Meta Pixel, Google Ads); then clear `GA4_ID`.
+ * - `GA4_ID`  — a GA4 measurement id, loaded directly via gtag.js. It is public
+ *   by design — visible in the page source of any site using GA4 — which is why
+ *   it can live in the repo.
  *
- * TODO(business): see "Analytics" in CLAUDE.md for how to create either one.
+ * See "Analytics" in CLAUDE.md for what is still pending in the console.
  */
 export const GTM_ID = "";
 export const GA4_ID = "G-DGPYL9J23P";
 
 // ─── Dates ────────────────────────────────────────────────────────────────
-export const LEGAL_LAST_UPDATED_ISO = "2026-08-30";
+export const LEGAL_LAST_UPDATED_ISO = "2026-08-31";
 
 /**
  * Hand-pinned `lastmod` for app/sitemap.ts. Deliberately not `new Date()`: a
  * lastmod that moves on every deploy teaches Google to ignore the signal.
  * Bump it when the copy actually changes.
  */
-export const CONTENT_UPDATED = "2026-08-30";
+export const CONTENT_UPDATED = "2026-08-31";

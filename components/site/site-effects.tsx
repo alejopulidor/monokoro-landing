@@ -14,6 +14,22 @@ import { useEffect } from "react";
  *
  * It renders nothing. Mount it once, in the locale layout.
  *
+ * **It watches the DOM, not the route.** App Router navigations swap the page's
+ * markup without remounting the layout, so an observer wired up once at mount
+ * never sees the next page's elements — they stay at `opacity: 0`, and the page
+ * arrives with only its hero visible (`.hero-in` is a mount animation and needs
+ * no observer). The symptom was having to reload to see a page properly.
+ *
+ * Keying the effect on `usePathname` looks like the fix and is not: measured,
+ * the router updates the pathname *before* the new segment commits on the first
+ * navigation, so the sweep runs against the outgoing DOM and finds nothing to
+ * observe. A `MutationObserver` sidesteps the race entirely — whenever nodes
+ * are added, anything new that wants revealing gets observed, whatever the
+ * commit order was. It also covers content that appears without a navigation.
+ *
+ * The scroll and pointer listeners are attached once and look their targets up
+ * by id on each frame, so they survive navigation without being re-bound.
+ *
  * What it drives — each one is opt-in via a class name, so a section only
  * needs to add the class:
  *
@@ -30,16 +46,54 @@ export function SiteEffects() {
     // ─── Scroll reveal ───────────────────────────────────────────────────
     // Under reduced motion the CSS already renders `.rv` visible, so the
     // observer would only add a class nothing reads. Skip it entirely.
+    // Stagger timers, cleared on unmount so a fast navigation cannot reveal
+    // elements belonging to a page that is already gone.
+    const timers: number[] = [];
+
     let io: IntersectionObserver | undefined;
     if (!reduced) {
       io = new IntersectionObserver(
-        (entries) =>
-          entries.forEach((e) => {
-            if (!e.isIntersecting) return;
-            e.target.classList.add("in");
-            io?.unobserve(e.target);
-          }),
-        { threshold: 0.14, rootMargin: "0px 0px -6% 0px" },
+        (entries) => {
+          // Stagger by what enters *together*, not by document order. A row of
+          // three cards crossing the fold in the same frame ripples; the same
+          // three stacked on a phone arrive one at a time and each starts
+          // immediately, because on mobile they are no longer a row. Sorting by
+          // position keeps the ripple left-to-right, top-to-bottom regardless
+          // of the order the observer hands them over in.
+          const arriving = entries
+            .filter((e) => e.isIntersecting)
+            .sort((a, b) => {
+              const ra = a.boundingClientRect;
+              const rb = b.boundingClientRect;
+              return ra.top - rb.top || ra.left - rb.left;
+            });
+
+          arriving.forEach((e, i) => {
+            const el = e.target as HTMLElement;
+            io?.unobserve(el);
+            // The stagger defers the class rather than setting an inline
+            // `transition-delay`. A lingering inline delay would also apply to
+            // the element's *next* transition — `.mk-lift` cards would take a
+            // quarter second to react to hover, long after the reveal was done.
+            // Capped at four, so a long list entering at once does not make the
+            // last item wait.
+            const delay = Math.min(i, 4) * 70;
+            if (delay === 0) {
+              el.classList.add("in");
+            } else {
+              timers.push(
+                window.setTimeout(() => el.classList.add("in"), delay),
+              );
+            }
+          });
+        },
+        {
+          // `threshold: 0` rather than a ratio: an element several viewports
+          // tall can never reach 14% visible, and would stay hidden forever.
+          // The negative bottom margin is what delays the trigger instead.
+          threshold: 0,
+          rootMargin: "0px 0px -8% 0px",
+        },
       );
     }
 
@@ -131,36 +185,54 @@ export function SiteEffects() {
       window.addEventListener("pointermove", onMove, { passive: true });
     }
 
+    /**
+     * Observe anything that wants revealing and is not revealed yet.
+     * `:not(.in)` makes this idempotent, so it can run as often as it likes.
+     */
+    const sweep = () => {
+      document
+        .querySelectorAll<HTMLElement>(
+          ".rv:not(.in), .mk-stack:not(.in), #mk-line:not(.in)",
+        )
+        .forEach((el) => io?.observe(el));
+      // A newly arrived page may bring its own card; place it before it paints.
+      onScrollFrame();
+    };
+
     // Two frames: the first lets React commit the tree, the second lets the
     // browser lay it out, so the observer measures real boxes instead of
     // firing on everything at position 0.
     const rafs: number[] = [];
     rafs.push(
       requestAnimationFrame(() => {
-        rafs.push(
-          requestAnimationFrame(() => {
-            document.querySelectorAll<HTMLElement>(".rv").forEach((el, i) => {
-              // The stagger comes from document order, in groups of four, so
-              // a row of cards ripples without any component counting delays.
-              el.style.transitionDelay = `${(i % 4) * 80}ms`;
-              io?.observe(el);
-            });
-            // The steps connector uses the same `.in` switch but its own rule.
-            const line = document.getElementById("mk-line");
-            if (line) io?.observe(line);
-            // Position the card correctly on first paint, before any scroll.
-            onScrollFrame();
-          }),
-        );
+        rafs.push(requestAnimationFrame(sweep));
       }),
     );
+
+    // Re-sweep whenever the DOM gains nodes — a navigation, in practice.
+    //
+    // Deliberately *not* debounced through `requestAnimationFrame`. That was
+    // the first version and it was the fragile part: a frame callback can be
+    // starved, and then a whole page never gets observed. MutationObserver
+    // already batches — its callback fires once per microtask checkpoint, not
+    // once per inserted node — and `sweep()` is a `querySelectorAll` plus an
+    // idempotent `observe()`, so running it per batch is cheap and cannot be
+    // skipped. Re-observing an already-observed element is a documented no-op,
+    // which is what makes running it several times per navigation harmless.
+    const mo = new MutationObserver((records) => {
+      if (!records.some((r) => r.addedNodes.length > 0)) return;
+      sweep();
+    });
+    mo.observe(document.body, { childList: true, subtree: true });
 
     return () => {
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("pointermove", onMove);
       io?.disconnect();
+      mo.disconnect();
       if (raf) cancelAnimationFrame(raf);
       rafs.forEach(cancelAnimationFrame);
+      timers.forEach(clearTimeout);
     };
   }, []);
 

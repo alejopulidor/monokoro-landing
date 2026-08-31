@@ -153,6 +153,15 @@ Those ids are the contract between the CSS, the markup and that file. Renaming o
 
 `.rv` is a **transition**, not an animation, which is why the reduced-motion block has to reset `opacity`/`transform` rather than just stop a timeline: a transition that never fires leaves the element parked at `opacity: 0`, i.e. a blank page.
 
+### Two things about it that were bugs, and must not be undone
+
+- **It watches the DOM, not the route.** App Router navigations swap the page's markup without remounting the layout, so an observer wired up once at mount never sees the next page's elements: they stay invisible and the page arrives with only its hero (`.hero-in` needs no observer). Keying the effect on `usePathname` *looks* like the fix and is not — measured, the router updates the pathname before the new segment commits on the first navigation, so the sweep runs against the outgoing DOM. A `MutationObserver` sidesteps the race. It is deliberately **not** debounced through `requestAnimationFrame`: a starved frame callback meant a whole page never got observed, and `MutationObserver` already batches by microtask.
+- **The stagger defers the class, it does not set `transition-delay`.** An inline delay survives the reveal and then applies to that element's *next* transition — `.mk-lift` cards took a quarter second to react to hover long after they had appeared. The delay is also computed from what enters *together* and sorted by position, so a row ripples left-to-right on a desktop and each card starts immediately when the same three are stacked on a phone.
+
+### Measuring any of this
+
+`--virtual-time-budget` starves both `IntersectionObserver` callbacks and `requestAnimationFrame`, so a headless harness will report reveals that never happened and misses that are not real. Instrument the mechanism instead of the result: patch `IntersectionObserver.prototype.observe` inside a same-origin iframe (the prototype, not the constructor — the site builds its observer once, before any patch you install after `load`) and count calls per navigation.
+
 ## Things that look wrong but aren't
 
 - **`app/layout.tsx` returns just `children`.** Required so `[locale]/layout.tsx` can own `<html lang>`. Don't "fix" it by adding html/body here — it creates nested documents and breaks the lang attribute.
@@ -257,16 +266,102 @@ Two traps, both hit while building it:
 
 Measure overflow rather than eyeballing it: an iframe harness that reports `documentElement.scrollWidth` and lists elements whose `getBoundingClientRect().right` exceeds the viewport is worth the two minutes.
 
-## Pending placeholders for the user
+## What is still missing
 
-Ordered by how much damage each does if it ships as-is.
+Everything the site does not yet have, grouped by **who can unblock it**. Within
+each group, ordered by how much damage it does if it ships as-is.
 
-1. **`WHATSAPP_NUMBER` in `lib/config.ts` is `573001234567`** — the design's placeholder. **Every CTA on the site points at it.** This is the one that must not ship.
-2. **The four rates** (`RATE_BUY`, `RATE_SELL`, `RATE_CARD`, `MIN_AMOUNT_COP`) are the design's numbers. They are labelled referential, but they should still be the real ones before launch.
-3. **Legal identity** — `messages/es.json` has "razón social por confirmar", "Domicilio: Por confirmar", "Identificación fiscal: Por confirmar" in both documents. Counsel has not reviewed either; they are a structured first draft, not advice.
-4. **Emails** (`hola@`, `legal@`, `privacidad@` at monokoro.co) are assumed, not confirmed.
-5. **`SITE_URL`** is `https://monokoro.co`, taken from the canvas's canonical tag. Confirm.
-6. **`whatsapp_click` is not yet a key event in GA4.** The tag ships and the event fires, but until it is marked as a key event and `link_text` is registered as a custom dimension, the conversion is not counted and you cannot tell which CTA produced it. See "Analytics".
-7. **No consent banner**, while the privacy policy says cookies can be rejected. This becomes a real problem the moment an analytics id is set.
-8. **`SOCIAL_URLS` is empty**, so `sameAs` is omitted from the schema. Add the real profiles when they exist; an empty or invented `sameAs` is a broken identity claim.
-9. **The OG cards have `MONOKORO.CO` baked into the image.** If the domain changes, re-render them with `pnpm og` — it is pixels, not a tag.
+Nothing here is a nice-to-have that got deferred: each item is either a
+placeholder standing in for a real value, or a claim the site makes that nobody
+has confirmed is true.
+
+### A. The business has to supply these — the site is not launchable without them
+
+1. **`WHATSAPP_NUMBER` in `lib/config.ts` is `573001234567`** — the design's
+   placeholder. **Every CTA on all five pages points at it.** This is the one
+   that must not ship.
+2. **The four rates** (`RATE_BUY`, `RATE_SELL`, `RATE_CARD`, `MIN_AMOUNT_COP`)
+   are the design's numbers. They are labelled referential everywhere, which is
+   honest, but they should still be the real ones — and `RATE_CARD > RATE_BUY`
+   has to stay true, because three sections explain *why* it is higher.
+3. **Legal identity.** `messages/es.json` carries "razón social por confirmar",
+   "Domicilio: Por confirmar" and "Identificación fiscal: Por confirmar" in both
+   documents. A legal page that cannot name the entity behind it is not a legal
+   page.
+4. **Emails** — `hola@`, `legal@`, `privacidad@` at monokoro.co are assumed, not
+   confirmed. They are rendered as `mailto:` links.
+5. **`SITE_URL`** is `https://monokoro.co`, taken from the canvas's canonical
+   tag. It is baked into every canonical, the sitemap, every JSON-LD `@id` — and
+   into the OG card images as pixels.
+
+### B. Counsel has to write these
+
+The legal documents were drafted for **buying and selling digital dollars**.
+`/tarjeta` and `/negocios` were added afterwards and the documents did not
+follow, so there are two concrete holes:
+
+6. **The Terms do not cover the card.** "Tarjeta" appears twice in
+   `messages/es.json`, both times about the recharge rate. Nothing covers
+   issuance, who the issuer is, freezing and deletion, disputed or reversed
+   charges, what happens to a remaining balance, or the card's own fees —
+   while `/tarjeta` and `/negocios` promise all of it.
+7. **The privacy policy does not cover business data.** It describes individual
+   KYC only: no mention of RUT, cámara de comercio or the legal
+   representative's documents, which is exactly what `/negocios` asks a company
+   to hand over.
+8. **There is no consent banner**, and the policy tells the reader they can
+   reject cookies. GA4 is live (`G-DGPYL9J23P`), so those two statements now
+   contradict each other in production. Either add the banner — and switch the
+   tag to Consent Mode v2 defaults — or amend the policy.
+9. **Nobody has confirmed how wallet recovery works.** The
+   "¿Qué pasa si pierdo mi celular?" answer therefore promises nothing: it
+   points at the customer's backup and offers to help. Do not upgrade it into a
+   guarantee until someone can state the mechanism. See "The three claims the
+   site must never get wrong".
+
+### C. Claims the site makes that somebody has to confirm are true *today*
+
+These came from the design canvases. They read as present tense, so if any of
+them is roadmap rather than reality, the copy has to say so or come out.
+
+10. **Do `/tarjeta` and `/negocios` describe a live product?** The pages say a
+    card is created "en minutos, desde el chat". If issuance is not live, that
+    is the single most expensive sentence on the site.
+11. **Who issues the card?** The copy says "se emite a tu nombre desde
+    Colombia" without naming an issuer. A card has one, and the Terms will have
+    to name it (see item 6).
+12. **API and webhooks** (`/negocios`, section `#api`) — card issuing and
+    control, balances, conversion, webhooks with a receipt per spend. Four
+    specific capabilities, presented as available.
+13. **Cobranded cards** — "tu logo al frente", for a team, for clients, or for
+    the customer's own product.
+14. **Support hours.** The rate ticker says "SOPORTE HUMANO 7 DÍAS"; the
+    business page says "HUMANO, TAMBIÉN DE NOCHE". Both are operational
+    promises, and they should agree with each other.
+
+### D. Engineering, once the above lands
+
+15. **`whatsapp_click` is not yet a key event in GA4.** The tag ships and the
+    event fires with its three parameters, but until it is marked as a key
+    event and `link_text` is registered as a custom dimension, the conversion is
+    not counted and you cannot tell which CTA produced it. See "Analytics".
+16. **`SOCIAL_URLS` is empty**, so `sameAs` is omitted from the Organization
+    schema. Add the real profiles when they exist; an empty or invented
+    `sameAs` is a broken identity claim.
+17. **Re-render the OG cards if the domain changes** (`pnpm og`). `MONOKORO.CO`
+    is baked into six images as pixels, not as a tag.
+18. **Bump the two dates when copy changes.** `CONTENT_UPDATED` feeds every
+    `lastmod` in the sitemap and `LEGAL_LAST_UPDATED_ISO` is printed on both
+    legal pages. Neither is `new Date()` on purpose — a lastmod that moves on
+    every deploy teaches Google to ignore the signal.
+
+### Not missing, on purpose
+
+So nobody "fixes" these later:
+
+- **No testimonials, no customer logos, no certification badges.** There are
+  none because none are real yet.
+- **No auto-redirect on the 404.** It was opt-in in the canvas, and moving
+  someone off a page they are still reading is hostile.
+- **No second locale.** See "i18n — Spanish only, on purpose" for what adding
+  one costs.
