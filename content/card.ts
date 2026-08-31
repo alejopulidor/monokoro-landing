@@ -25,6 +25,7 @@ export const CARD_HERO_SPECS = [
   { k: "CREACIÓN", v: "EN MINUTOS, DESDE EL CHAT" },
   { k: "RESPALDO", v: "DÓLARES DIGITALES TOKENIZADOS" },
   { k: "PAGAS EN", v: "DÓLARES O PESOS" },
+  { k: "EN TIENDA", v: "APPLE PAY · GOOGLE PAY" },
   { k: "TASA", v: "UNA SOLA, VISIBLE ANTES" },
   { k: "CONTROL", v: "CONGELA · RECARGA · ELIMINA" },
 ];
@@ -151,7 +152,7 @@ export const CARD_USES: RuledItem[] = [
   {
     n: "05",
     t: "El día a día en Colombia",
-    d: "Domicilios, mercado, transporte: el comercio cobra en pesos y sale de tu saldo en dólares, a la tasa del momento.",
+    d: "Domicilios, mercado, transporte: la agregas a Apple Pay o Google Pay y pagas con el celular. El comercio cobra en pesos y sale de tu saldo en dólares, a la tasa del momento.",
   },
 ];
 

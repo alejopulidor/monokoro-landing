@@ -64,6 +64,9 @@ export const BUSINESS_MOBILE_NAV: NavItem[] = [
   { label: "El problema", href: "#problema", ready: true },
   { label: "Qué es", href: "#que-es", ready: true },
   ...BUSINESS_NAV,
+  // Mobile-only, deliberately: `components/site/nav.tsx` documents that the
+  // five desktop links already wrap below 900px and push the CTA off the bar.
+  { label: "Panel", href: "#panel", ready: true },
   { label: "Compara", href: "#compara", ready: true },
   { label: "Empezar", href: "#empezar", ready: true },
   { label: "Preguntas", href: "#faq", ready: true },

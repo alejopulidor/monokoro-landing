@@ -12,7 +12,7 @@ import { TrustPanel } from "@/components/shared/trust-panel";
 import { CardFace } from "@/components/shared/card-face";
 import { postHref } from "@/content/posts";
 import { fmtCOP } from "@/lib/format";
-import { RATE_BUY, RATE_CARD, RATE_SELL } from "@/lib/config";
+import { RATE_BUY, RATE_CARD, RATE_SELL, waLink } from "@/lib/config";
 import { cx } from "@/lib/cx";
 import {
   BIZ_BRAND,
@@ -20,6 +20,7 @@ import {
   BIZ_CHAT,
   BIZ_CHAT_MS,
   BIZ_FLOW,
+  BIZ_PANEL,
   BIZ_PERKS,
   BIZ_PROBLEM,
   BIZ_REQUIREMENTS,
@@ -103,6 +104,12 @@ export function BizWhatIs() {
               cliente, por proveedor o por persona.
             </p>
             <p className="max-w-[560px] text-[19px] leading-[1.6] text-[var(--color-muted)] text-pretty">
+              Ese saldo se puede dividir en bolsillos: un monto reservado del que
+              consumen varias tarjetas a la vez —uno para pauta, uno para
+              proveedores, uno por cliente— sin sacar la plata de la billetera de
+              la empresa.
+            </p>
+            <p className="max-w-[560px] text-[19px] leading-[1.6] text-[var(--color-muted)] text-pretty">
               Cada tarjeta paga en dólares lo que se cobra en dólares, y en pesos
               lo local — convirtiendo desde el saldo con la tasa Monokoro, la
               misma que ves en el chat. Sin recargos escondidos encima.
@@ -149,6 +156,74 @@ export function BizHow() {
 /** The four reasons, under the use cases. */
 export function BizPerks() {
   return <CardGrid items={BIZ_PERKS} min={240} className="mt-5" />;
+}
+
+/**
+ * The band that closes `#api`, passed in through `RuledList`'s `after` slot.
+ *
+ * The canvas had a dark band here with a `POST /v1/cards` chip and a
+ * "Ver documentación →" link whose `href` was `#`. Neither shipped, and the
+ * endpoint chip still should not: printing a plausible-but-unverified route is
+ * the same class of mistake as printing a plausible BIN on the card face. So
+ * the band asks for access instead, which is true today and is also how the
+ * SDK and the iframe actually get handed over.
+ *
+ * `lib/nav.ts` already has the `ready` flag for the day a docs page exists —
+ * that is where the link belongs then, not here.
+ */
+export function BizApiAccess() {
+  return (
+    <div className="rv panel-flat mt-[clamp(30px,4vw,44px)] flex flex-wrap items-center justify-between gap-x-10 gap-y-6 p-[clamp(26px,3.4vw,40px)]">
+      <div className="min-w-0 flex-[1_1_400px]">
+        <div className="ff-m text-[12px] tracking-[0.14em] text-[var(--color-mint)]">
+          PARA EMPEZAR A INTEGRAR
+        </div>
+        <p className="mt-4 max-w-[560px] text-[clamp(19px,2.4vw,26px)] leading-[1.25] tracking-[-0.025em] text-pretty">
+          Te damos las credenciales, la documentación y el SDK, y un equipo
+          acompaña la primera integración.
+        </p>
+      </div>
+      <a
+        href={waLink(
+          "Hola, quiero integrar por API. ¿Me pasan el acceso y la documentación?",
+        )}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="mk-mag btn btn-paper"
+      >
+        Pedir el acceso <Arrow />
+      </a>
+    </div>
+  );
+}
+
+/**
+ * "Todo lo que pasa por el chat, también lo ves en un panel."
+ *
+ * The one section that introduces a *second* place to operate, which is why the
+ * copy is additive rather than corrective. `BIZ_HERO_SPECS`, `BIZ_PERKS`, the
+ * compare table and the closing CTA all promise WhatsApp; the panel is where a
+ * team *reads* the operation, and the chat stays the fast path for changing it.
+ * Reword it as a replacement and eight other strings start lying.
+ *
+ * The `id` is `panel`, and that is the only place the word may appear as an
+ * identifier: `.panel` and `.panel-flat` in `app/globals.css` are the dark
+ * surface primitives, so a class named after this product would collide with
+ * them. Product word in the copy and the anchor, never in a class name.
+ */
+export function BizPanel() {
+  return (
+    <section id="panel" className="sec-lg gutter">
+      <div className="shell">
+        <SectionHead
+          eyebrow="ADMINISTRACIÓN"
+          title="Todo lo que pasa por el chat, también lo ves en un panel."
+          lede="El chat sigue siendo lo más rápido para crear o congelar una tarjeta. El panel es donde tu equipo lo ve todo junto: cada tarjeta, cada bolsillo y cada movimiento."
+        />
+        <CardGrid items={BIZ_PANEL} min={240} className="mt-[clamp(32px,4vw,48px)]" />
+      </div>
+    </section>
+  );
 }
 
 /**
@@ -238,6 +313,20 @@ export function BizBrand() {
               items={BIZ_BRAND_SPECS}
               className="rv panel-flat rounded-[22px] p-[clamp(22px,3vw,28px)]"
             />
+            {/* The only place on the site that names a cost without naming a
+                figure, so it needs somewhere to ask. Same quiet link treatment
+                as the article link in `BizWhatIs` — never a second button, or
+                it competes with the page's one CTA. */}
+            <a
+              href={waLink(
+                "Hola, quiero saber qué incluye el cobranding de las tarjetas y cuánto cuesta",
+              )}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2.5 self-start border-b border-[rgba(44,122,128,0.35)] pb-[3px] text-[17px] font-medium text-[var(--color-teal)] hover:text-[var(--color-ink)]"
+            >
+              Pedir el detalle del cobranding <Arrow />
+            </a>
           </div>
 
           <CardGrid

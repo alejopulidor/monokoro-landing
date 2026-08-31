@@ -45,7 +45,7 @@ export function generateStaticParams() {
 
 const TITLE = "Tarjeta Monokoro — Paga en dólares desde WhatsApp";
 const DESCRIPTION =
-  "Una tarjeta respaldada en dólares digitales. Se crea en minutos desde el chat, paga en dólares lo que se cobra en dólares y en pesos lo del día a día, con una sola tasa que ves antes de confirmar.";
+  "Una tarjeta respaldada en dólares digitales. Se crea en minutos desde el chat y la agregas a Apple Pay o Google Pay para pagar en tienda. Paga en dólares lo que se cobra en dólares, con una sola tasa visible antes de confirmar.";
 
 export async function generateMetadata({
   params,

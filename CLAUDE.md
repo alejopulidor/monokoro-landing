@@ -547,6 +547,40 @@ Beyond this it is content, not tags: clear, specific, checkable answers to quest
 - **Rates are referential everywhere.** "TASA DE REFERENCIA · SE CONFIRMA EN EL CHAT" next to the quoter CTA, and the footer strip, are load-bearing. Nothing on this site is a live quote. Don't present one as live without wiring a real source.
 - Never invent a testimonial, a customer name or a certification. There are none on the site today, and that is correct.
 
+### Three words that now mean two things each
+
+All three were introduced by the Apple Pay / bolsillos round, and each one can
+be misread into a claim the site must not make.
+
+- **"tokenizado" is the USDT balance, never the card.** It appears eight times
+  and every one is `DÓLARES DIGITALES TOKENIZADOS` or a sentence about what
+  backs the balance — including the compliance sentence in
+  `components/card/what-is.tsx`. So the card copy says **"la agregas a Apple Pay
+  o Google Pay"** and never "tarjeta tokenizable", which next to that vocabulary
+  reads as being about the dollars. The one place **"tokenización"** is allowed
+  is `/negocios` `#marca`, where it is the correct technical term for cobranded
+  artwork inside a wallet and the reader is a technical buyer.
+- **"wallet" is two different things and only one of them is a *billetera*.**
+  The customer's *billetera* holds the dollars; Apple Pay / Google Pay holds the
+  card. Calling the second one a billetera would suggest Monokoro's dollars sit
+  in Apple's or Google's custody, which is wrong twice over. The site names
+  those two products in English and never translates them.
+- **A "bolsillo" is a division of the business's balance, and nothing else.**
+  Not a *cuenta*, not a *sub-cuenta*, not something Monokoro holds — all three
+  describe exactly the arrangement claim 2 above exists to deny. Nothing moves
+  when a bolsillo is created; only the way the business reads its own balance
+  does.
+
+### Two places a qualifier goes, and neither is an asterisk
+
+There are no footnote markers anywhere on this site. A qualifier is either the
+mono caption line — `TASA DE REFERENCIA · SE CONFIRMA EN EL CHAT`, and now
+`EN LA WALLET · SE COTIZA APARTE` — or it is in the sentence itself
+("cobrandeadas **si se quiere**"). `RuledList` has a `footnote` prop for the
+first shape; `CardGrid` does not, which is why the cobranding cost is stated
+three times in `#marca`: in the card's own text, in the spec row, and in the
+link that lets someone ask. One of the three alone would be missable.
+
 ## Build & verify
 
 ```bash
@@ -683,27 +717,53 @@ them is roadmap rather than reality, the copy has to say so or come out.
 11. **Who issues the card?** The copy says "se emite a tu nombre desde
     Colombia" without naming an issuer. A card has one, and the Terms will have
     to name it (see item 6).
-12. **API and webhooks** (`/negocios`, section `#api`) — card issuing and
-    control, balances, conversion, webhooks with a receipt per spend. Four
-    specific capabilities, presented as available.
-13. **Cobranded cards** — "tu logo al frente", for a team, for clients, or for
-    the customer's own product.
-14. **Support hours.** The rate ticker says "SOPORTE HUMANO 7 DÍAS"; the
+12. **Apple Pay and Google Pay.** The card is described as virtual *and*
+    usable at a physical counter because the customer adds it to a wallet.
+    This is the most consequential unconfirmed claim on the site: provisioning
+    a card into either wallet is **issuer- and network-dependent**, so it
+    cannot be answered before item 11 is. It is also not a single sentence to
+    retract — it rewrote `¿Es una tarjeta física?` and `¿Sirve en cualquier
+    página?` (both of which ship inside the `FAQPage` JSON-LD, so a stale
+    answer is a structured-data lie, not just a paragraph), added a hero spec
+    row on both product pages, changed `CARD_USES` item 05, and appears in
+    `/tarjeta`'s `DESCRIPTION`, its `Service` schema and `/llms.txt`.
+13. **The admin panel and the bolsillos** (`/negocios`, section `#panel`). A
+    whole section, two FAQ answers and a step in the money's journey describe a
+    surface nobody outside the company has seen. If the panel is not live this
+    is the second most expensive section on the site, after issuance itself.
+14. **API, SDK and the iframe** (`/negocios`, section `#api`) — card issuing
+    and control, balances, conversion, webhooks with a receipt per spend, an
+    SDK over the same API, and an iframe that renders the card's number,
+    expiry and CVV. Six capabilities, presented as available. Two extra things
+    to check here: the iframe copy says the data goes in "sin que tu sistema
+    tenga que tocarlos", which is an architectural claim rather than a feature;
+    and **no endpoint is printed anywhere on purpose** — the canvas had a
+    `POST /v1/cards` chip and it stays out until someone confirms the real
+    shape, for the same reason a plausible BIN never goes on the card face.
+15. **Cobranded cards** — "tu logo al frente", for a team, for clients, or for
+    the customer's own product; plus the same artwork **at the tokenization
+    level**, so the card carries the client's brand inside Apple Pay and Google
+    Pay. The site says that second one "se cotiza aparte" and routes to
+    WhatsApp rather than naming a figure, which is honest about the commercial
+    side but still asserts the capability exists. It also presupposes item 12.
+16. **Support hours.** The rate ticker says "SOPORTE HUMANO 7 DÍAS"; the
     business page says "HUMANO, TAMBIÉN DE NOCHE". Both are operational
     promises, and they should agree with each other.
 
 ### D. Engineering, once the above lands
 
-15. **`whatsapp_click` is not yet a key event in GA4.** The tag ships and the
+17. **`whatsapp_click` is not yet a key event in GA4.** The tag ships and the
     event fires with its three parameters, but until it is marked as a key
     event and `link_text` is registered as a custom dimension, the conversion is
     not counted and you cannot tell which CTA produced it. See "Analytics".
-16. **`SOCIAL_URLS` is empty**, so `sameAs` is omitted from the Organization
+18. **`SOCIAL_URLS` is empty**, so `sameAs` is omitted from the Organization
     schema. Add the real profiles when they exist; an empty or invented
     `sameAs` is a broken identity claim.
-17. **Re-render the OG cards if the domain changes** (`pnpm og`). `MONOKORO.CO`
-    is baked into six images as pixels, not as a tag.
-18. **Bump the two dates when copy changes.** `CONTENT_UPDATED` feeds every
+19. **Re-render the OG cards if the domain changes, or if the chips go stale**
+    (`pnpm og`). `MONOKORO.CO` is baked into six images as pixels, not as a
+    tag — and so is the negocios card's "API disponible" chip
+    (`scripts/og/cards.json`), which the page itself now words as "API y SDK".
+20. **Bump the two dates when copy changes.** `CONTENT_UPDATED` feeds every
     `lastmod` in the sitemap and `LEGAL_LAST_UPDATED_ISO` is printed on both
     legal pages. Neither is `new Date()` on purpose — a lastmod that moves on
     every deploy teaches Google to ignore the signal.

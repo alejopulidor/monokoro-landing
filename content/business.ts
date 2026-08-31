@@ -11,6 +11,11 @@ import type { ChatMsg } from "@/components/shared/agent-chat";
  * Same copy rules as `content/card.ts`: the balance sits in the *billetera* of
  * the business, never in an account with Monokoro, and the pesos leg lands in
  * the business's *cuenta bancaria*. See CLAUDE.md.
+ *
+ * **A "bolsillo" is a division of that balance, and nothing more.** Never a
+ * *cuenta*, never a *sub-cuenta*, never something Monokoro holds — all three
+ * would describe exactly the arrangement claim 2 exists to deny. The money does
+ * not move when a bolsillo is created; only the way the business reads it does.
  */
 
 export const BIZ_HERO_SPECS = [
@@ -19,6 +24,7 @@ export const BIZ_HERO_SPECS = [
   { k: "CONTROL", v: "CONGELA · RECARGA · ELIMINA" },
   { k: "RESPALDO", v: "DÓLARES DIGITALES TOKENIZADOS" },
   { k: "PAGAS EN", v: "DÓLARES O PESOS" },
+  { k: "EN TIENDA", v: "APPLE PAY · GOOGLE PAY" },
 ];
 
 /**
@@ -75,6 +81,11 @@ export const BIZ_FLOW: FlowStep[] = [
     k: "SALDO EN DÓLARES · USD",
     d: "Queda en dólares digitales tokenizados, en la billetera de la empresa y a su nombre.",
     dot: "#2C7A80",
+  },
+  {
+    k: "BOLSILLOS",
+    d: "Divides el saldo por campaña, cliente o proveedor. Varias tarjetas pueden consumir del mismo.",
+    dot: "#338289",
   },
   {
     k: "TARJETAS",
@@ -154,6 +165,36 @@ export const BIZ_CASES: RuledItem[] = [
   },
 ];
 
+/**
+ * The admin surface, and the one section that adds a *second* place to do
+ * things. The chat stays the fast path on purpose — every other section on this
+ * page, the hero specs and the closing CTA all say "desde WhatsApp", so the
+ * copy here is additive ("también lo ves en un panel") and never a correction.
+ * Reword it as a replacement and eight other strings start lying.
+ */
+export const BIZ_PANEL: GridItem[] = [
+  {
+    n: "01",
+    t: "El panel de administración",
+    d: "Entras y ves las tarjetas del negocio en una sola pantalla, con su saldo y su estado.",
+  },
+  {
+    n: "02",
+    t: "Bolsillos",
+    d: "Un monto reservado del que consumen varias tarjetas a la vez. Ideal para pauta: el equipo gasta de un solo bolsillo y tú decides cuánto entra ahí.",
+  },
+  {
+    n: "03",
+    t: "Gestión de cada tarjeta",
+    d: "Creas, recargas, congelas o eliminas desde el panel, igual que por chat.",
+  },
+  {
+    n: "04",
+    t: "Movimientos y comprobantes",
+    d: "Cada gasto con su comprobante, filtrable por tarjeta, por bolsillo o por fecha.",
+  },
+];
+
 export const BIZ_COMPARE: CompareRow[] = [
   { k: "Crear una tarjeta", a: "Solicitud y días hábiles", b: "Minutos, desde el chat o la API" },
   { k: "Cuántas puedes tener", a: "Las que autorice el banco", b: "Ilimitadas" },
@@ -172,16 +213,21 @@ export const BIZ_BRAND: GridItem[] = [
   },
   {
     n: "02",
+    t: "Tu marca también en la wallet",
+    d: "El arte cobrandeado se puede llevar al nivel de tokenización, para que la tarjeta se vea con tu marca dentro de Apple Pay y Google Pay. Se cotiza aparte.",
+  },
+  {
+    n: "03",
     t: "Tarjetas para tus clientes",
     d: "Si tu producto necesita emitir tarjetas en dólares, las emites bajo tu nombre.",
   },
   {
-    n: "03",
+    n: "04",
     t: "Reglas a tu medida",
     d: "Límites por tarjeta, por equipo o por campaña, definidos como los maneja tu operación.",
   },
   {
-    n: "04",
+    n: "05",
     t: "Onboarding acompañado",
     d: "Un equipo humano configura, prueba y deja andando el flujo con tu gente.",
   },
@@ -191,6 +237,7 @@ export const BIZ_BRAND_SPECS = [
   { k: "DISEÑO", v: "TU MARCA" },
   { k: "RESPALDO", v: "DÓLARES DIGITALES" },
   { k: "EMISIÓN", v: "CHAT O API" },
+  { k: "EN LA WALLET", v: "SE COTIZA APARTE" },
 ];
 
 export const BIZ_API: RuledItem[] = [
@@ -213,6 +260,16 @@ export const BIZ_API: RuledItem[] = [
     n: "04",
     t: "Webhooks y comprobantes",
     d: "Cada gasto notifica a tu sistema con su comprobante, sin exportar planillas.",
+  },
+  {
+    n: "05",
+    t: "SDK",
+    d: "Sobre la misma API, para integrar sin construir el cliente desde cero.",
+  },
+  {
+    n: "06",
+    t: "Iframe con tu marca",
+    d: "Los datos de la tarjeta —número, fecha y CVV— se muestran dentro de un iframe que personalizas para que se vea como tu producto, sin que tu sistema tenga que tocarlos.",
   },
 ];
 

@@ -32,8 +32,10 @@ import { Faq } from "@/components/shared/faq";
 import { Closing } from "@/components/shared/closing";
 import { CardFan } from "@/components/card/hero-visual";
 import {
+  BizApiAccess,
   BizBrand,
   BizHow,
+  BizPanel,
   BizPerks,
   BizProblem,
   BizRates,
@@ -47,7 +49,7 @@ export function generateStaticParams() {
 
 const TITLE = "Monokoro Negocios — Tarjetas en dólares para tu operación";
 const DESCRIPTION =
-  "Tarjetas empresariales en dólares para pauta, proveedores y viáticos. Ilimitadas, creadas en minutos desde WhatsApp, con tu marca si la quieres y API para conectarlas a tu sistema.";
+  "Tarjetas empresariales en dólares para pauta, proveedores y viáticos. Ilimitadas, creadas desde WhatsApp y administradas en un panel con bolsillos por campaña, con tu marca si la quieres y API y SDK para conectarlas a tu sistema.";
 
 export async function generateMetadata({
   params,
@@ -89,9 +91,13 @@ export async function generateMetadata({
  *
  * Same argument shape as `/tarjeta` but aimed at an operator rather than a
  * person: what breaks today (problema) → what it is (qué es) → how you start
- * (cómo) → who it is for (casos) → what the rates are (tasas) → why it beats
- * the bank (compara) → what makes it yours (marca, API) → the ask (empezar,
- * faq, cierre).
+ * (cómo) → who it is for (casos) → how you run it day to day (panel) → what
+ * the rates are (tasas) → why it beats the bank (compara) → what makes it
+ * yours (marca, API) → the ask (empezar, faq, cierre).
+ *
+ * `panel` sits after `casos` on purpose: it answers "and how do I actually
+ * manage forty of these?", which is the question the use cases raise and
+ * nothing before it answered.
  */
 export default async function BusinessPage({
   params,
@@ -138,7 +144,7 @@ export default async function BusinessPage({
           waMessage={BIZ_WA}
           secondaryLabel="Cómo funciona"
           secondaryHref="#como"
-          perks={["TARJETAS ILIMITADAS", "CON TU MARCA", "API DISPONIBLE"]}
+          perks={["TARJETAS ILIMITADAS", "CON TU MARCA", "API Y SDK"]}
           specs={BIZ_HERO_SPECS}
           visual={
             <CardFan
@@ -165,6 +171,8 @@ export default async function BusinessPage({
           after={<BizPerks />}
         />
 
+        <BizPanel />
+
         <BizRates />
 
         <section id="compara" className="sec-lg gutter">
@@ -188,8 +196,9 @@ export default async function BusinessPage({
           id="api"
           eyebrow="PARA EQUIPOS TÉCNICOS"
           title="Conéctalo a lo que ya usas."
-          lede="Todo lo que se hace por chat se puede hacer por API, para cuando el volumen deja de caber en una conversación."
+          lede="Todo lo que se hace por chat se puede hacer por API, con SDK y piezas listas para embeber en tu producto — para cuando el volumen deja de caber en una conversación."
           items={BIZ_API}
+          after={<BizApiAccess />}
         />
 
         <BizStart />

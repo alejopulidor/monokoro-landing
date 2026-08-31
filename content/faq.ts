@@ -70,7 +70,11 @@ export const CARD_FAQ_ITEMS: FaqItem[] = [
   },
   {
     q: "¿Es una tarjeta física?",
-    a: "No, es virtual. Los datos llegan al chat y los usas de inmediato en cualquier compra online o suscripción internacional.",
+    a: "Es virtual, y no necesitas plástico. La agregas a Apple Pay o Google Pay y pagas en tienda con el celular, igual que online y en suscripciones internacionales.",
+  },
+  {
+    q: "¿Puedo pagar en una tienda física?",
+    a: "Sí. Agregas la tarjeta a Apple Pay o Google Pay una vez y pagas acercando el celular. El cobro sale del mismo saldo en dólares.",
   },
   {
     q: "¿Puedo pagar en pesos con la tarjeta?",
@@ -78,7 +82,7 @@ export const CARD_FAQ_ITEMS: FaqItem[] = [
   },
   {
     q: "¿Sirve en cualquier página?",
-    a: "En cualquier comercio online que acepte tarjetas internacionales. Algunos servicios exigen una tarjeta emitida en su propio país; eso no lo resuelve ninguna tarjeta local.",
+    a: "En cualquier comercio online que acepte tarjetas internacionales, y en tienda donde acepten pagos con celular. Algunos servicios exigen una tarjeta emitida en su propio país; eso no lo resuelve ninguna tarjeta local.",
   },
   {
     q: "¿Puedo devolver el saldo a pesos?",
@@ -102,7 +106,7 @@ export const CARD_FAQ_ITEMS: FaqItem[] = [
   },
   {
     q: "¿Necesito descargar algo?",
-    a: "No. La tarjeta se crea y se maneja desde WhatsApp. Pronto habrá app como complemento, nunca como requisito.",
+    a: "No. La tarjeta se crea y se maneja desde WhatsApp, y para pagar en tienda usas Apple Pay o Google Pay, que ya vienen en el celular. Pronto habrá app como complemento, nunca como requisito.",
   },
 ];
 
@@ -126,11 +130,19 @@ export const BUSINESS_FAQ_ITEMS: FaqItem[] = [
   },
   {
     q: "¿Puedo emitir tarjetas con mi marca?",
-    a: "Sí. Se emiten cobrandeadas para tu equipo, tus clientes o tu propio producto: tu logo al frente y nuestra infraestructura detrás, por chat o por API.",
+    a: "Sí. Se emiten cobrandeadas para tu equipo, tus clientes o tu propio producto: tu logo al frente y nuestra infraestructura detrás, por chat o por API. Llevar tu marca también a la vista de Apple Pay y Google Pay se cotiza aparte — escríbenos y te pasamos el detalle.",
   },
   {
     q: "¿Tienen API?",
-    a: "Sí: emisión y control de tarjetas, consulta de saldos y movimientos, conversión pesos ↔ dólares y webhooks con el comprobante de cada gasto.",
+    a: "Sí: emisión y control de tarjetas, consulta de saldos y movimientos, conversión pesos ↔ dólares y webhooks con el comprobante de cada gasto. Hay SDK sobre la misma API y un iframe, personalizable con tu marca, para mostrar los datos de la tarjeta dentro de tu producto.",
+  },
+  {
+    q: "¿Qué es un bolsillo?",
+    a: "Un monto reservado dentro del saldo del negocio del que consumen varias tarjetas a la vez. Sirve para separar pauta, proveedores o clientes sin abrir nada nuevo: el saldo sigue en la billetera de la empresa.",
+  },
+  {
+    q: "¿Hay un panel además del chat?",
+    a: "Sí. El chat es lo más rápido para crear o congelar una tarjeta; el panel es donde el equipo ve todas las tarjetas, los bolsillos y los movimientos en una sola pantalla, con el comprobante de cada gasto.",
   },
   {
     q: "¿Qué pasa si alguien sale del equipo?",

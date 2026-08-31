@@ -9,9 +9,14 @@ import { postHref } from "@/content/posts";
  *
  * The three paragraphs do distinct jobs and none is padding: the first says
  * there is no conversion on a dollar charge, the second says the card still
- * works for everything else, and the third names the instrument — tokenized
- * digital dollars, in the customer's own wallet. That third one is the
- * compliance sentence; do not soften it into "tu saldo".
+ * works for everything else — including at a physical counter, which is what
+ * Apple Pay / Google Pay is doing in there — and the third names the
+ * instrument: tokenized digital dollars, in the customer's own wallet. That
+ * third one is the compliance sentence; do not soften it into "tu saldo".
+ *
+ * Note the two senses of "wallet" on this page. The customer's *billetera* is
+ * where the dollars live; Apple Pay / Google Pay is where the card lives. They
+ * are unrelated, and the copy never uses the Spanish word for the second one.
  */
 export function CardWhatIs() {
   return (
@@ -31,9 +36,10 @@ export function CardWhatIs() {
               extranjera.
             </p>
             <p className="max-w-[560px] text-[19px] leading-[1.6] text-[var(--color-muted)] text-pretty">
-              Y sirve para todo lo demás. Si el comercio cobra en pesos, la
-              tarjeta convierte desde tu saldo con la tasa Monokoro — la misma
-              que ves en el chat, sin recargos escondidos encima.
+              Y sirve para todo lo demás. La agregas a Apple Pay o Google Pay
+              y pagas en tienda con el celular; si el comercio cobra en pesos,
+              la tarjeta convierte desde tu saldo con la tasa Monokoro — la
+              misma que ves en el chat, sin recargos escondidos encima.
             </p>
             <p className="max-w-[560px] text-[19px] leading-[1.6] text-[var(--color-muted)] text-pretty">
               El respaldo son dólares digitales tokenizados: cada unidad vale un
