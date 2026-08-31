@@ -139,7 +139,7 @@ export function BizHow() {
           <AgentChat
             script={BIZ_CHAT}
             durations={BIZ_CHAT_MS}
-            minHeight={300}
+            height={550}
             label="Ejemplo de la conversación en WhatsApp: pides una tarjeta de viáticos para alguien del equipo, la autorizas con un código y le llega a esa persona."
           />
           <ColoredSteps steps={BIZ_STEPS} />

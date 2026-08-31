@@ -137,7 +137,26 @@ export function WhatsappDemo() {
       aria-label="Ejemplo de la conversación en WhatsApp: pides una cotización, confirmas la tasa y recibes tus dólares digitales en minutos."
     >
       {/* ── Chat header ─────────────────────────────────────────────── */}
-      <div className="relative flex items-center gap-[11px] overflow-hidden bg-[#0A2B31] px-[15px] py-[13px]">
+      {/*
+        **The header's height is reserved, not natural.** `status` cycles
+        through three strings and the longest,
+        "EN LÍNEA · RESPONDE EN MINUTOS", wraps to two lines below ~430px while
+        the other two fit on one — so the header grew and shrank on every loop
+        and the page moved 16px with it, measured at 390px. It is the same class
+        of defect as the message viewport below, in a place nobody looks.
+
+        Two things that did *not* work, so they do not get tried again:
+        hiding the WHATSAPP caption freed ~86px and the string still wrapped
+        (the mock sits inside a padded panel, so the column is far narrower than
+        the viewport); and `nowrap` with a smaller face fitted it only by
+        ellipsising — measured 197px of text into a 130px box at 360, which cut
+        "RESPONDE EN MINUTOS" off on every phone.
+
+        So the height is pinned per regime instead: two lines' worth below
+        430px, one above. Re-derive by removing the classes and measuring the
+        tallest `status` at 360px and at 1440px.
+      */}
+      <div className="relative flex h-[79px] items-center gap-[11px] overflow-hidden bg-[#0A2B31] px-[15px] py-[13px] min-[430px]:h-[64px]">
         <div
           className="pointer-events-none absolute inset-0 h-[40%] bg-[linear-gradient(90deg,transparent,rgba(106,221,155,.12),transparent)]"
           style={{ animation: "scanline 6s linear infinite" }}

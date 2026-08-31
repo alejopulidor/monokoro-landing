@@ -48,7 +48,7 @@ export function AgentChat({
   durations,
   label,
   className,
-  minHeight = 230,
+  height = 380,
 }: {
   script: ChatMsg[];
   /** One entry per step, including step 0. `durations.length` is the cycle. */
@@ -56,7 +56,12 @@ export function AgentChat({
   /** What the panel is, for assistive tech. */
   label: string;
   className?: string;
-  minHeight?: number;
+  /**
+   * Fixed height of the message viewport, in px. **Not a minimum** — see the
+   * comment on the container below. Pick it from a measurement of the script's
+   * tallest step at the narrowest width, not by eye.
+   */
+  height?: number;
 }) {
   const [rawStep, setRawStep] = useState(0);
   const reduced = usePrefersReducedMotion();
@@ -99,9 +104,72 @@ export function AgentChat({
         </div>
       </div>
 
+      {/*
+        **Fixed height, anchored to the bottom, clipped** — the same fix
+        `components/home/whatsapp-demo.tsx` already carries, and for the same
+        reason. This was `minHeight`, so the last two steps of the loop outgrew
+        the floor and the card jumped taller, dragging everything below it. It
+        repeated every cycle, forever.
+
+Measure before changing the numbers, because the answer
+        changes with the viewport — the bubbles wrap more when the column is
+        narrow. Content height at the fullest step of the loop, as built:
+
+        | page       | 390px | 760px | 1024px | 1440px | height |
+        | ---------- | ----- | ----- | ------ | ------ | ------ |
+        | /negocios  | 491px | 511px | 471px  | 430px  |  550   |
+        | /tarjeta   | 328px | 328px | 287px  | 287px  |  380   |
+
+        **760px is the worst case, not 390px** — the two columns are still side
+        by side there, so the chat is at its narrowest while the type is at full
+        size. An eyeball check at 1440 says the box is 120px too tall; a check
+        at 760 says it has 25px to spare. Trust the second one.
+
+        Those 25px are deliberate: at the first pass the box cleared 760px by
+        5px, and one longer word or a font-metric change would have clipped the
+        payoff bubble — the issued-card receipt, which is the whole point of the
+        sequence.
+
+        The jump was 223px on /negocios at 390 and 130px on /tarjeta at 390.
+        Note that **the card page looked clean at desktop widths only because
+        `ColoredSteps` beside it is taller and the flex row stretched the
+        card** — so a reading taken at 1440 alone says "no jump" and is wrong.
+
+        **Anchored to the top, unlike the home demo, and that difference is
+        the point.** The home demo's script overflows its viewport, so there
+        `justify-end` is right: new messages arrive at the bottom and old ones
+        leave through the top. Here the heights clear the measured maximum, so
+        nothing has to leave — and with `justify-end` the resting state parked a
+        single bubble at the bottom under ~450px of blank card, which reads as a
+        rendering fault rather than as a quiet conversation. Growing downwards
+        from the top is what a chat window with few messages actually looks
+        like.
+
+        `overflow-hidden` and the fade stay as a safety net for a script that
+        grows later: the fade is on the *bottom* edge, matching the direction
+        the messages grow.
+
+        **The chat ground and its dotted wallpaper are part of the same fix.**
+        A fixed box tall enough for the whole script is mostly empty for the
+        first half of the loop, and on the plain card background that emptiness
+        read as an unfinished panel. On the chat ground — the same
+        `--color-chat-bg` and dot pattern the home demo uses — it reads as a
+        chat window with room in it, which is what every messaging app looks
+        like. Killing the jump traded a moving panel for a tall one; this is
+        what makes the tall one look deliberate.
+      */}
       <div
-        className="flex flex-col gap-2 px-0.5 py-4"
-        style={{ minHeight }}
+        className="mt-2.5 flex flex-col gap-2 overflow-hidden rounded-[14px] bg-[var(--color-chat-bg)] px-3 py-3.5"
+        style={{
+          height,
+          backgroundImage:
+            "radial-gradient(rgba(44,122,128,.10) 1px,transparent 1px)",
+          backgroundSize: "18px 18px",
+          // Only visible if a future script outgrows `height`. Static, so it
+          // rasterises once.
+          maskImage: "linear-gradient(to top,transparent 0,#000 20px)",
+          WebkitMaskImage: "linear-gradient(to top,transparent 0,#000 20px)",
+        }}
       >
         {visible.map((m) => (
           <div
