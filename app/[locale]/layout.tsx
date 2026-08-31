@@ -17,6 +17,7 @@ import { Aurora } from "@/components/site/aurora";
 import { MotionProvider } from "@/components/motion/motion-provider";
 import { Analytics, AnalyticsNoScript } from "@/components/site/analytics";
 import { AnalyticsEvents } from "@/components/site/analytics-events";
+import { CookieConsent } from "@/components/site/cookie-consent";
 
 /*
   The real document. `app/layout.tsx` above is a passthrough so this component
@@ -139,6 +140,13 @@ export default async function LocaleLayout({
           <div className="relative z-10">
             <NextIntlClientProvider locale={locale} messages={messages}>
               {children}
+              {/* Inside the provider, unlike its siblings below, because the
+                  notice links to /privacy through next-intl's `Link` — and
+                  next-intl's navigation hooks throw when used above their own
+                  provider. Mounted outside, this rendered nothing at all and
+                  the banner never appeared. It is `position: fixed`, which
+                  `overflow-x: clip` does not trap (same as `Aurora`). */}
+              <CookieConsent />
             </NextIntlClientProvider>
           </div>
         </div>

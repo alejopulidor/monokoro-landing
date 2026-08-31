@@ -172,6 +172,12 @@
   @keyframes bubbleIn {
     from { opacity: 0; transform: translateY(10px) scale(0.985); }
   }
+  /* The cookie notice sliding up. `from`-only so the finished state is the
+     identity — under the reduced-motion wildcard the .01ms run lands there
+     immediately instead of leaving the notice offset. */
+  @keyframes consentIn {
+    from { opacity: 0; transform: translateY(14px); }
+  }
   @keyframes blinkDot {
     0%, 80%, 100% { opacity: 0.25; }
     40%           { opacity: 1; }

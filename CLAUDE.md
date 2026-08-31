@@ -526,7 +526,28 @@ Left, all inside analytics.google.com and none of it in code:
 
 Search Console, worth doing once alongside: add `https://monokoro.co` as a **Domain** property, verify by DNS TXT, submit `https://monokoro.co/sitemap.xml`, then link it to GA4 under **Admin → Product links**.
 
-**Consent is unresolved.** The privacy policy tells the reader they can reject cookies, and there is no banner. Reconcile the two before launch — either add a banner (and switch the tags to Consent Mode v2 defaults) or amend the policy.
+### Consent
+
+The privacy policy says **"puedes rechazarlas sin perder acceso al contenido"**, so nothing may store an analytics cookie before the visitor answers. Three files, and the order between two of them is load-bearing:
+
+- `lib/consent.ts` — the key, the decision, and a tiny subscribable store.
+- `components/site/analytics.tsx` — Consent Mode v2 defaults, **denied**.
+- `components/site/cookie-consent.tsx` — the notice.
+
+**The defaults script must run before the tag loads**, and it must not be `async`. Load them the other way round and gtag falls back to its own defaults (granted) and has already written `_ga` by the time the update arrives. The same snippet then reads `localStorage` and re-grants immediately for a visitor who already said yes — otherwise every page view for a consenting visitor starts cookieless for `wait_for_update` milliseconds.
+
+Only `analytics_storage` ever moves. The four ad signals stay denied because no ad tag exists here; granting them would claim a permission nothing uses.
+
+Measured, on a clean profile: first visit → notice shown, **zero `_ga` cookies**. Reject → `denied` stored, still zero. Accept → `_ga` and `_ga_<id>` appear. Reload after accepting → cookies restored by the inline snippet, no notice.
+
+Two things that are decisions, not defaults:
+
+- **Refusing is exactly as easy as accepting** — same size, same row, no pre-ticked box, no close button that means yes. A notice where refusing is harder does not collect consent, and the policy sentence above would still be false.
+- **The notice does not block the page.** Not modal, no focus trap, no dimming — again what the policy promises. On phones it sits *above* `MobileCta` rather than over it: that bar is the conversion.
+
+**The trap, which cost a full test cycle:** `CookieConsent` links to `/privacy` with next-intl's `Link`, so it must be mounted **inside `NextIntlClientProvider`** — unlike `MotionProvider` and `AnalyticsEvents`, which are deliberately outside it. Mounted outside, it rendered nothing at all and the notice simply never appeared, with no error in the build. Same trap the comment beside `MotionProvider` warns about.
+
+**When a second tool arrives** (PostHog, Meta Pixel), it goes behind the same decision — read `readConsent()` before initialising it, and add it to the notice's wording.
 
 ## AI answer engines (GEO)
 
@@ -704,10 +725,12 @@ follow, so there are two concrete holes:
    KYC only: no mention of RUT, cámara de comercio or the legal
    representative's documents, which is exactly what `/negocios` asks a company
    to hand over.
-8. **There is no consent banner**, and the policy tells the reader they can
-   reject cookies. GA4 is live (`G-DGPYL9J23P`), so those two statements now
-   contradict each other in production. Either add the banner — and switch the
-   tag to Consent Mode v2 defaults — or amend the policy.
+8. **The consent banner now exists** (Consent Mode v2, denied by default — see
+   "Consent" under Analytics), so the contradiction with the policy is closed.
+   What is left for counsel is narrower: confirm that the notice's wording and
+   §2.4 of the policy say the same thing, and that "solo las necesarias" is the
+   right characterisation of what stays on — today that is one `localStorage`
+   key holding the answer itself, and nothing else.
 9. **Nobody has confirmed how wallet recovery works.** The
    "¿Qué pasa si pierdo mi celular?" answer therefore promises nothing: it
    points at the customer's backup and offers to help. Do not upgrade it into a

@@ -1,6 +1,7 @@
 import { Link } from "@/i18n/navigation";
 import { Arrow, MonokoroMark, Wordmark } from "./brand";
 import { FOOTER_LEGAL, FOOTER_PRODUCT, ready } from "@/lib/nav";
+import { CONSENT_REOPEN_ATTR } from "@/lib/consent";
 import { postHref, postsFor } from "@/content/posts";
 import type { Locale } from "@/i18n/routing";
 
@@ -61,6 +62,18 @@ export function Footer({ locale }: { locale: Locale }) {
                 {i.label}
               </Link>
             ))}
+            {/* Reopens the notice. A plain button carrying an attribute, with
+                no handler: `CookieConsent` listens by delegation, which is what
+                keeps this whole footer a Server Component. Someone has to be
+                able to change their mind — a decision with no way back is not
+                a choice, and the privacy policy says the choice is theirs. */}
+            <button
+              type="button"
+              {...{ [CONSENT_REOPEN_ATTR]: "" }}
+              className={`${linkCls} text-left`}
+            >
+              Cookies
+            </button>
           </FooterCol>
         </div>
 
