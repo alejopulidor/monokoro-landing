@@ -20,7 +20,16 @@ They are a compliance position, not marketing, and the specific Colombian risk t
 
 WhatsApp is the *support channel only*: verification, payment and delivery happen on Monokoro's own infrastructure. It is **not** a bank and **not** a deposit-taking institution.
 
-**Unresolved:** nobody has confirmed how recovery actually works with the wallet provider, so the "¿Qué pasa si pierdo mi celular?" answer deliberately promises nothing — it points at the backup the customer saved and offers to help. Do not upgrade it into a guarantee until someone can state the mechanism. The word *ahorra* in the hero headline is the design's and is kept, but it is worth a look from counsel: "ahorro" is a loaded term next to captación.
+### "Ahorrar" is fine. What is not fine is a return obligation.
+
+Captación is about *receiving the public's money against an obligation to give it back* — with or without yield. It is a structure, not a vocabulary. "Ahorrar" is ordinary Spanish for holding value: you save by buying at a discount, by not spending, by holding an asset that keeps its value. None of that involves anyone taking your money.
+
+So the test is the sentence's shape, not its words:
+
+- **Fine** — the customer is the subject and the asset is the object: "ahorra en dólares", "ahorras para el viaje", "ahorrar en pesos es aceptar una pérdida". Every use on the site today is this shape.
+- **Not fine** — Monokoro as the holder, or anything implying a return: "ahorra *con* Monokoro", "tus ahorros están seguros con nosotros", "cuenta de ahorro", "tu saldo con nosotros", or any mention of rendimiento/interés/rentabilidad that is not a denial. The only two mentions of "rendimientos" in the repo are negations, and they should stay negations.
+
+**Unresolved:** nobody has confirmed how recovery actually works with the wallet provider, so the "¿Qué pasa si pierdo mi celular?" answer deliberately promises nothing — it points at the backup the customer saved and offers to help. Do not upgrade it into a guarantee until someone can state the mechanism.
 
 ## Stack
 
