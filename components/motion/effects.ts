@@ -81,6 +81,12 @@ export function reveal() {
           // Batching is what produces the ripple: three cards crossing the
           // fold on the same frame stagger, while the same three stacked on a
           // phone arrive one at a time and each starts immediately.
+          //
+          // Note when measuring this: with `batch`'s own 0.1s grouping window
+          // plus this stagger and `DUR.enter`, the last card in a group can
+          // still be at `opacity: 0` almost a second after it crossed the
+          // fold. A harness that samples a few hundred ms after scrolling will
+          // report those as "stuck" and they are not — let it settle first.
           stagger: STAGGER.base,
           overwrite: "auto",
         }),

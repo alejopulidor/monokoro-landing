@@ -77,22 +77,21 @@ export function CardFace({
       aria-label={reading}
     >
       {watermark && (
-        /* The isotipo, embossed, bleeding off the right edge.
+        /* The isotipo, flat, bleeding toward the right edge.
            `<MonokoroMark>` cannot do this: it emits hard width/height
            attributes, so it can neither be sized in percentages nor cross an
            edge — hence the inlined path.
 
-           A plate plus two offset **strokes**, not two offset fills. The first
-           attempt was two translucent copies of the shape, one dark and one
-           light, on the theory that the light one would cover the dark one
-           except for a sliver. Translucent fills do not cover anything: 7.5%
-           white over 24% black is still 24% black, so it rendered as one dark
-           blob. A stroke only paints the outline, so the light and dark slivers
-           are real and the interior stays a faint plate. Light from the top
-           left, shadow to the bottom right — raised, not engraved.
+           **One path, fill only, no stroke.** It went through an embossed
+           version first — a plate plus a dark and a light offset stroke — and
+           the outline read as a hard edge stuck on top of the card rather than
+           as relief in the material. A stroke in the *fill* colour does not fix
+           that either: a stroke straddles the path, so its inner half
+           composites on top of the fill and the outline still comes out as a
+           brighter ring. Flat means no stroke.
 
-           The offsets are in viewBox units, so the emboss scales with the mark
-           the way a real one would. */
+           The alpha carries the whole shape now, so it is higher than the
+           embossed version's plate was — there are no edges left to define it. */
         <svg
           viewBox="0 0 478 390"
           preserveAspectRatio="xMidYMid meet"
@@ -101,23 +100,7 @@ export function CardFace({
         >
           <path
             transform="translate(239,195) rotate(45)"
-            fill="rgba(255,255,255,0.05)"
-            fillRule="evenodd"
-            d={MONOKORO_SOLID_D}
-          />
-          <path
-            transform="translate(241,197) rotate(45)"
-            fill="none"
-            stroke="rgba(0,0,0,0.11)"
-            strokeWidth="2.5"
-            fillRule="evenodd"
-            d={MONOKORO_SOLID_D}
-          />
-          <path
-            transform="translate(237,193) rotate(45)"
-            fill="none"
-            stroke="rgba(255,255,255,0.15)"
-            strokeWidth="2.5"
+            fill="rgba(255,255,255,0.075)"
             fillRule="evenodd"
             d={MONOKORO_SOLID_D}
           />

@@ -272,9 +272,32 @@ So the order is fixed: **reap → wire → refresh.**
 The signal is a `MutationObserver`, not the pathname — measured, the router
 updates the pathname *before* the new segment commits on the first navigation,
 so a pathname-keyed sweep runs against the outgoing DOM. That was the reported
-bug ("on mobile the blog only loaded the first text"). It is deliberately **not**
-debounced through `requestAnimationFrame`: a starved frame left a whole page
-unanimated, and MutationObserver already batches by microtask.
+bug ("on mobile the blog only loaded the first text"). **The wiring is synchronous; only the remeasure is deferred.** Debouncing the
+whole thing through `requestAnimationFrame` was the first version and a starved
+frame left a whole page unanimated — so `sync()` runs straight out of the
+observer callback and `ScrollTrigger.refresh()` is what gets queued to the next
+frame. A starved frame now costs a stale measurement, not an invisible page.
+
+### The hang this had, because it will be tempting to loosen the filter
+
+**`ScrollTrigger.refresh()` appends a bare `<div>` to `document.body` to measure
+the scroller, then removes it inside the same task.** The observer read that as
+"new content arrived", called `sync()`, and `sync()` called `refresh()` — which
+appended the probe again.
+
+Measured on `/es/`: **445 of 447 added elements were that probe**, 443 observer
+callbacks and 3,573 `querySelectorAll` calls in 9.5 seconds. A self-sustaining
+~49 Hz treadmill. Chrome showed "page unresponsive". After the fix, the same
+9.5 seconds: **32 callbacks, 138 queries.**
+
+The fix is one condition in the observer: **an added node counts only if it is an
+Element *and* is still `isConnected`.** A MutationObserver callback is a
+microtask, so it runs after the task that queued it has unwound — by which time
+GSAP's probe is detached and real content is not. That makes `isConnected`
+exactly the line between the two, with no allow-list of node names for a GSAP
+update to invalidate. Text nodes are skipped for a related reason: `counters()`
+rewrites `textContent` every frame, and reacting to that would put a full sync
+between every pair of animation frames.
 
 That is only affordable because the reaction is incremental. **Three of the five
 pages animate a chat mock that appends bubbles forever**, so this observer fires
@@ -501,15 +524,28 @@ Worth reading before writing another harness — three of these each cost an hou
 - **Chrome launched from Node's `spawn` ignores its URL argument** and opens
   `chrome://newtab/`. Launched from the shell with the URL last, it works. So
   let the shell launch it and have the script only attach.
-- **`Page.navigate` leaves the session unanswered.** After one, the very first
-  `Runtime.evaluate` never returns — confirmed with a plain `1 + 1`, on a
-  page-target socket and on a flattened browser session alike. One Chrome per
-  page instead. A client-navigation check needs no CDP navigation anyway: click
-  the real link, which is how a visitor gets there.
-- **Node's built-in global `WebSocket` gets no reply from the DevTools
-  endpoint.** It opens the connection and then nothing comes back. The `ws`
-  package works against the same endpoint immediately. Install it in the
+- **Use the `ws` package, not Node's built-in global `WebSocket`.** The global
+  one opens the connection but never receives a reply. Install `ws` in the
   scratchpad, not in this project.
+- **`Runtime.evaluate` not answering means the page's main thread is blocked, not
+  that CDP is broken.** It runs on the renderer's main thread. This cost an hour
+  of blaming the harness — the notes here previously claimed `Page.navigate`
+  "leaves the session unanswered" and that Node's `WebSocket` "gets no reply";
+  both were the same symptom of the refresh feedback loop above, not protocol
+  problems. `Page.enable` and `Runtime.enable` still succeed in that state,
+  which is what makes it so misleading.
+- **When it stops answering, use the debugger.** `Debugger.enable` while the page
+  is still `about:blank`, navigate, then `Debugger.pause`: the V8 inspector
+  handles it out of band, so it interrupts a script that is already looping and
+  `Debugger.paused` hands you the call stack. Then
+  `Debugger.evaluateOnCallFrame` reads any state you want **while paused**,
+  which is the only way to inspect a page in that condition. That is what found
+  the loop; nothing else would have.
+- **Inject counters with `Page.addScriptToEvaluateOnNewDocument`** before the
+  page's own scripts, wrapping `MutationObserver` and
+  `Document.prototype.querySelectorAll` onto a `window.__mk` object. Reading
+  those under `Debugger.pause` turns "it feels slow" into "445 of 447 added
+  nodes are GSAP's probe".
 - **Scroll with `Input.dispatchMouseEvent` wheel events, not `window.scrollTo`.**
   Lenis intercepts wheel and ignores a programmatic `scrollTop`, so `scrollTo`
   exercises a path no user takes.
@@ -517,6 +553,12 @@ Worth reading before writing another harness — three of these each cost an hou
   attributes into the DOM, so counting them says exactly what each effect wired
   without exposing anything from the bundle for a test. Cheaper and more
   trustworthy than inferring from computed styles.
+- **Let the reveal settle before judging it.** `batch` groups over 0.1s, the
+  stagger adds 0.07s per element and the tween runs 0.6s, so a card that just
+  crossed the fold is legitimately invisible for up to ~0.9s. Sampling a few
+  hundred ms after a wheel tick reported three "stuck" elements per page that
+  were not stuck at all — every one cleared on its own two seconds later with no
+  further scrolling. Wait ~1.1s after each scroll, then assert.
 - Give each headless run its own `--user-data-dir`, or concurrent runs fail
   silently on the profile lock. And **never `taskkill /F /IM chrome.exe`** to
   clean up — it closes the user's own browser too. Kill by PID.

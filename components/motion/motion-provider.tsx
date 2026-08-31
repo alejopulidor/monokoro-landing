@@ -62,15 +62,21 @@ import { setLenis } from "./lenis-instance";
  * bug — "on mobile the blog only loaded the first text"). An observer reacts to
  * *nodes existing*, which is the one signal that cannot arrive early.
  *
- * It is deliberately **not** debounced through `requestAnimationFrame`. That
- * was the first version, and a starved frame left a whole page unanimated.
- * MutationObserver already batches by microtask checkpoint.
+ * **The wiring is synchronous; only the remeasure is deferred.** Debouncing the
+ * whole thing through `requestAnimationFrame` was the first version and a
+ * starved frame left a whole page unanimated — so `sync()` still runs straight
+ * out of the observer callback, and `ScrollTrigger.refresh()` is what gets
+ * queued to the next frame. A starved frame now costs a stale measurement
+ * instead of an invisible page.
  *
  * Which is only affordable because the reaction is incremental. Three of the
  * five pages animate a chat mock that appends bubbles forever, so this observer
  * fires every 0.7–4.4 seconds for as long as the tab is open. `claim()` makes
  * re-running the list nearly free, and the `killed || wired` gate is what keeps
  * `refresh()` from becoming a permanent treadmill.
+ *
+ * See the comment on the observer itself for the loop this used to have and how
+ * `isConnected` closes it — that one is worth reading before touching any of it.
  */
 export function MotionProvider() {
   useEffect(() => {
@@ -96,13 +102,33 @@ export function MotionProvider() {
         },
       };
 
+      /**
+       * `ScrollTrigger.refresh()` is deferred to the next frame and coalesced.
+       *
+       * Two reasons, and the second one is not optional. It keeps a burst of
+       * mutations to a single remeasure; and it means a refresh can never run
+       * inside the microtask that a mutation woke, which is the shape a
+       * feedback loop needs. The wiring above stays synchronous — a starved
+       * frame then costs a stale measurement, never an unanimated page.
+       */
+      let refreshQueued = false;
+      const queueRefresh = () => {
+        if (refreshQueued) return;
+        refreshQueued = true;
+        const f = requestAnimationFrame(() => {
+          refreshQueued = false;
+          ScrollTrigger.refresh();
+        });
+        frames.push(f);
+      };
+
       const sync = () => {
         const killed = reap();
         const wired = effects.reduce((n, fn) => n + fn(ctx), 0);
         // Only remeasure when the trigger population actually changed.
         // Without this gate the looping chat mocks would force a full
         // ScrollTrigger.refresh() every second, forever.
-        if (killed || wired) ScrollTrigger.refresh();
+        if (killed || wired) queueRefresh();
       };
 
       // Belt and braces, and the two passes do different jobs. The
@@ -111,20 +137,55 @@ export function MotionProvider() {
       // measurements are taken against real boxes. Running both is safe
       // because `claim()` is idempotent, and a mismeasurement here fails
       // *visible* — see the from-state guarantee in effects.ts.
-      sync();
       const frames: number[] = [];
+      sync();
       frames.push(
         requestAnimationFrame(() => {
           frames.push(requestAnimationFrame(sync));
         }),
       );
 
+      /**
+       * Only react to added elements that are **still in the document**.
+       *
+       * This is the fix for a hang that shipped, and the test is precise rather
+       * than defensive. `ScrollTrigger.refresh()` appends a bare `<div>` to
+       * `document.body` to measure the scroller and removes it again inside the
+       * same task. This observer saw that as "new content arrived", called
+       * `sync()`, and `sync()` called `refresh()` — which appended the probe
+       * again. Measured on `/es/`: **445 of the 447 added elements were that
+       * probe**, 443 observer callbacks and 3,573 `querySelectorAll` calls in
+       * 9.5 seconds, a self-sustaining ~49 Hz treadmill that pinned the main
+       * thread. Chrome showed "page unresponsive"; `Runtime.evaluate` over CDP
+       * stopped answering, which is also why measuring this was so confusing.
+       *
+       * A MutationObserver callback is a microtask, so it runs after the task
+       * that queued it has unwound — by which time GSAP's probe is already
+       * detached and real content is not. `isConnected` is therefore exactly
+       * the line between the two, and it needs no allow-list of node names
+       * that a GSAP update could invalidate.
+       *
+       * Text nodes are skipped for a related reason: `counters()` rewrites
+       * `textContent` every frame, which replaces a text node, and reacting to
+       * that would put a full sync between every pair of animation frames.
+       *
+       * `attributes` is deliberately not observed either: writing the claim
+       * flags and GSAP writing inline styles must not re-trigger this.
+       */
       const mo = new MutationObserver((records) => {
-        if (!records.some((r) => r.addedNodes.length > 0)) return;
+        let real = false;
+        for (const r of records) {
+          for (const node of r.addedNodes) {
+            if (node.nodeType === 1 && node.isConnected) {
+              real = true;
+              break;
+            }
+          }
+          if (real) break;
+        }
+        if (!real) return;
         sync();
       });
-      // `attributes` is deliberately absent: writing the claim flags and GSAP
-      // writing inline styles must not re-trigger this.
       mo.observe(document.body, { childList: true, subtree: true });
 
       return () => {
