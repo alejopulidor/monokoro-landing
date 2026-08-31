@@ -1,0 +1,45 @@
+[
+  {
+    "id": "home",
+    "kicker": "DÓLARES DIGITALES · COLOMBIA",
+    "title": "Ahorra en <em>dólares</em>.<br>Desde WhatsApp.",
+    "sub": "Cotizas, confirmas la tasa y recibes en minutos. Después los gastas con tu tarjeta, en dólares.",
+    "chips": ["Una sola tasa", "Sin apps nuevas", "Soporte humano"],
+    "trust": "MONOKORO.CO"
+  },
+  {
+    "id": "aprende",
+    "kicker": "APRENDE",
+    "title": "Dólares digitales,<br><em>explicados sin vueltas</em>.",
+    "sub": "Guías cortas para entender qué estás comprando, cuánto cuesta de verdad y cómo usarlo.",
+    "chips": ["Sin jerga", "Sin promesas raras"],
+    "trust": "MONOKORO.CO/APRENDE"
+  },
+  {
+    "id": "que-es-un-dolar-digital",
+    "kicker": "GUÍA · 3 MIN DE LECTURA",
+    "title": "¿Qué es un <em>dólar digital</em> y por qué existe?",
+    "sub": "Qué son, quién los respalda y en qué se diferencian de una criptomoneda volátil.",
+    "chips": ["Respaldo", "Riesgos", "Cómo se compra"],
+    "trust": "MONOKORO.CO/APRENDE",
+    "long": true
+  },
+  {
+    "id": "ahorrar-en-dolares-colombia",
+    "kicker": "AHORRO · 2 MIN DE LECTURA",
+    "title": "Ahorrar en dólares en Colombia: <em>tres formas y sus costos</em>",
+    "sub": "Cuenta en el exterior, casa de cambio y dólar digital. Qué cuesta entrar y qué cuesta salir.",
+    "chips": ["Costo de entrada", "Costo de salida", "Monto mínimo"],
+    "trust": "MONOKORO.CO/APRENDE",
+    "long": true
+  },
+  {
+    "id": "tarjeta-rechazada-pagos-internacionales",
+    "kicker": "PAGOS · 2 MIN DE LECTURA",
+    "title": "Por qué tu tarjeta <em>rebota</em> en pagos internacionales",
+    "sub": "Conversión doble, cupo cerrado y bloqueos por riesgo. Cómo evitar el rechazo.",
+    "chips": ["4 causas comunes", "Cómo se evita"],
+    "trust": "MONOKORO.CO/APRENDE",
+    "long": true
+  }
+]

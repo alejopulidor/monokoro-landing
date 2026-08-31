@@ -6,6 +6,7 @@ import { notFound } from "next/navigation";
 import { routing, type Locale } from "@/i18n/routing";
 import { SITE_URL } from "@/lib/config";
 import { breadcrumbSchema, collectionSchema } from "@/lib/schema";
+import { ogImage } from "@/lib/og";
 import { FEATURED_SLUG, getPost, postsFor } from "@/content/posts";
 import { JsonLd } from "@/components/seo/json-ld";
 import { Nav } from "@/components/site/nav";
@@ -41,8 +42,17 @@ export async function generateMetadata({
     openGraph: {
       title: TITLE,
       description: DESCRIPTION,
+      siteName: "Monokoro",
+      locale: "es_CO",
       type: "website",
       url: `${SITE_URL}/${locale}/aprende/`,
+      images: ogImage("aprende", "Aprende — dólares digitales explicados"),
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: TITLE,
+      description: DESCRIPTION,
+      images: ogImage("aprende", "Aprende — dólares digitales explicados"),
     },
   };
 }

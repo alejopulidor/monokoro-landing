@@ -7,6 +7,7 @@ import { Link } from "@/i18n/navigation";
 import { routing, type Locale } from "@/i18n/routing";
 import { SITE_URL } from "@/lib/config";
 import { articleSchema, breadcrumbSchema } from "@/lib/schema";
+import { ogImage } from "@/lib/og";
 import { POSTS, getPost, postsFor, relatedFor } from "@/content/posts";
 import { JsonLd } from "@/components/seo/json-ld";
 import { Nav } from "@/components/site/nav";
@@ -62,9 +63,19 @@ export async function generateMetadata({
     openGraph: {
       title: post.title,
       description: post.excerpt,
+      siteName: "Monokoro",
+      locale: "es_CO",
       type: "article",
       publishedTime: post.published,
+      // Card ids mirror post slugs — see lib/og.ts.
+      images: ogImage(post.slug, post.title),
       url,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: post.title,
+      description: post.excerpt,
+      images: ogImage(post.slug, post.title),
     },
   };
 }

@@ -28,6 +28,21 @@ export async function generateMetadata({
         routing.locales.map((l) => [l, `${SITE_URL}/${l}/terms/`]),
       ),
     },
+    // No social card on purpose. Legal pages are reference material, not
+    // something anyone shares, and inheriting the home card would unfurl this
+    // URL as the landing page. `images: []` is what stops that inheritance —
+    // see lib/og.ts.
+    openGraph: {
+      title: t("title"),
+      siteName: "Monokoro",
+      locale: "es_CO",
+      type: "article",
+      url: `${SITE_URL}/${locale}/terms/`,
+      images: [],
+    },
+    // Downgrade from the layout's large-image card: a `summary_large_image`
+    // with no image is a card-shaped hole.
+    twitter: { card: "summary" },
   };
 }
 

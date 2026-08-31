@@ -116,6 +116,63 @@ Those ids are the contract between the CSS, the markup and that file. Renaming o
 - **The mobile CTA is hidden with CSS, not with a JS viewport check.** The design canvas branched on an `isMobile` state; on a statically exported page that means the bar is absent from the HTML and pops in after hydration.
 - **`FinancialService` is deliberately absent from the Organization schema.** Claiming a regulated service type without the licence is a compliance problem, not an SEO trick.
 
+## OG images (social cards)
+
+**One image per page — never point two pages at the same file.** The preview *is* the ad, and two links that unfurl identically read as duplicates.
+
+Cards are not designed in Figma. There is **one template**, `scripts/og/card.html`, and the content for every card lives in `scripts/og/cards.json`. The template reads its content from base64 JSON in the URL hash, so adding a card is a JSON entry, not a copy-pasted HTML file.
+
+```bash
+pnpm og                            # render every card into public/og/
+node scripts/og/render.mjs home    # just one, by id
+```
+
+The pipeline is Chrome at 2x → PNG → PowerShell `System.Drawing` downscale to 1200×630 + JPEG q90 (~80 KB). Both ship with Windows, which is why there is no image dependency in `package.json` for something that runs a few times a year.
+
+- **The cards are not rebuilt by `pnpm build`.** They change when the copy changes, not when the code does. Run the script by hand and commit the JPEG.
+- Card ids **mirror post slugs**, which is what lets `ogImage(post.slug, …)` work in the article route. `lib/og.ts` imports `cards.json` directly, so an id cannot drift from a file that exists; an unknown id logs a warning at build time and emits no image rather than a 404.
+- The legal pages deliberately get **no card** (`images: []`). Inheriting the home card would unfurl `/es/terms/` as the landing page.
+- `--virtual-time-budget` matters: the fonts come from the Google Fonts CDN, not `next/font`, because the file is opened directly by Chrome, outside the app. Without it the capture fires before the webfonts land and you get fallback type.
+- Colours are copied **literally** from `app/globals.css`. The file is standalone; `var(--color-mint)` resolves to nothing out here.
+- Pin anything that must not reflow: `white-space: nowrap` on the kicker and the chips. A wrap you did not intend is invisible until the card is already live.
+- **Always look at the render before shipping it.** Read the JPEG back as an image; a card that silently lost its webfonts or clipped a line still "renders successfully".
+
+Social title and description are free to **diverge from `<title>` / `meta description`** — the `<title>` targets search intent, the card sells a moment. That is why `cards.json` carries its own copy instead of importing from `content/posts.ts`.
+
+## Analytics
+
+`GTM_ID` and `GA4_ID` live in `lib/config.ts`, both empty. **While both are empty nothing is injected** — no script, no cookie, no request. Set one, not both: GTM can host the GA4 tag itself, and loading GA4 twice double-counts every pageview.
+
+- `components/site/analytics.tsx` — the tags. Plain inline `<script>`, not `next/script`: `afterInteractive` only injects after hydration, which on a static export means the tag misses every visitor who leaves before React boots.
+- `components/site/analytics-events.tsx` — **the part that actually matters here.** This site has exactly one conversion, opening WhatsApp, and it happens by *leaving the page*, so a pageview-only setup measures none of it. One delegated listener catches every `a[href*="wa.me"]` click and fires `whatsapp_click`. It listens in the **capture** phase: by the bubble phase the browser may already be tearing the page down and the beacon never leaves.
+
+The event is sent twice because the two destinations read it differently — GTM listens on `dataLayer`, while gtag.js needs a real `gtag('event', …)` call and ignores a bare push.
+
+### Setting it up in the Google console (GTM route, the one Tenko uses)
+
+1. tagmanager.google.com → create an account for Monokoro, container type **Web**, container name `monokoro.co`. Copy the `GTM-XXXXXXX`.
+2. analytics.google.com → create a GA4 property, add a **Web** data stream for `https://monokoro.co`. Copy the `G-XXXXXXXXXX`.
+3. GTM → **Tags → New → Google Tag**, paste the `G-` id, trigger **Initialization – All Pages**.
+4. GTM → **Triggers → New → Custom Event**, event name exactly `whatsapp_click`.
+5. GTM → **Tags → New → Google Analytics: GA4 Event**, event name `whatsapp_click`, that trigger. Add event parameters `link_text`, `link_url`, `page_path` from Data Layer Variables of the same names (create them under **Variables** first).
+6. **Preview**, click a CTA, confirm the event fires — then **Submit**.
+7. GA4 → **Admin → Events → Mark as key event** on `whatsapp_click`. That is the conversion.
+8. Put the `GTM-` id in `lib/config.ts` and deploy.
+
+Worth doing once, alongside: Search Console → add `https://monokoro.co` as a **Domain** property, verify by DNS TXT, submit `https://monokoro.co/sitemap.xml`.
+
+**Consent is unresolved.** The privacy policy tells the reader they can reject cookies, and there is no banner. Reconcile the two before launch — either add a banner (and switch the tags to Consent Mode v2 defaults) or amend the policy.
+
+## AI answer engines (GEO)
+
+The goal is showing up when someone asks ChatGPT or Perplexity how to buy dollars in Colombia. Three things do the work, and none of them is a trick:
+
+- **`app/robots.ts` lists the AI crawlers explicitly**, split into two named groups because they do different jobs. `ANSWER_BOTS` fetch a page to cite it in a live answer — blocking those means being invisible in AI answers. `TRAINING_BOTS` collect pages to train future models; that is a business trade, not an SEO setting, and it is allowed here deliberately. `GPTBot`, `ClaudeBot`, `Google-Extended` and `Applebot-Extended` are all **opt-out** — silence means yes.
+- **`app/llms.txt/route.ts`** generates `/llms.txt` from `content/posts.ts` and `lib/config.ts`, so it cannot drift from the site. It is the one place the shape of the business is stated once, unambiguously and without a marketing voice — including what Monokoro *is not*. Two rules for what goes in: **no rates** (they change, and this file gets cached and quoted), and **only claims that are also on the site**.
+- **The structured data already on every page.** `Organization` + `WebSite` in the locale layout, `Service` + `FAQPage` on the home, `Article` + `BreadcrumbList` per post, `CollectionPage` on the index — all referencing one entity by `@id`. That graph is what lets an answer engine attribute a claim to Monokoro rather than to "a website".
+
+Beyond this it is content, not tags: clear, specific, checkable answers to questions people actually ask. The three guides are that. More of them beats any meta tag.
+
 ## Brand & copy rules
 
 - Spanish is **neutral LATAM `tú`**, not voseo. `vende`, `tienes`, `mandas` — never `vendé`, `tenés`, `mandás`.
@@ -132,10 +189,11 @@ pnpm dev        # http://localhost:3000 → /es
 pnpm build      # static export → ./out/
 pnpm typecheck  # tsc --noEmit
 pnpm lint
+pnpm og         # re-render the social cards — by hand, not part of the build
 npx serve out   # preview the static build
 ```
 
-The build emits 13 routes: `/`, `/_not-found`, `/es`, `/es/aprende`, three articles, `/es/terms`, `/es/privacy`, `/icon.svg`, `/robots.txt`, `/sitemap.xml`.
+The build emits 14 routes: `/`, `/_not-found`, `/es`, `/es/aprende`, three articles, `/es/terms`, `/es/privacy`, `/icon.svg`, `/llms.txt`, `/robots.txt`, `/sitemap.xml`.
 
 ### Screenshotting this site
 
@@ -155,6 +213,7 @@ Ordered by how much damage each does if it ships as-is.
 3. **Legal identity** — `messages/es.json` has "razón social por confirmar", "Domicilio: Por confirmar", "Identificación fiscal: Por confirmar" in both documents. Counsel has not reviewed either; they are a structured first draft, not advice.
 4. **Emails** (`hola@`, `legal@`, `privacidad@` at monokoro.co) are assumed, not confirmed.
 5. **`SITE_URL`** is `https://monokoro.co`, taken from the canvas's canonical tag. Confirm.
-6. **No OG images.** `openGraph` has no `images` entry on any route, so links unfurl with no card. One image per page — never point two pages at the same file; the preview *is* the ad.
-7. **No analytics.** There is no GTM container and no tag anywhere.
+6. **No analytics id.** `GTM_ID` / `GA4_ID` in `lib/config.ts` are empty, so no tag ships. The code and the `whatsapp_click` conversion are already in place — see "Analytics" for the console steps.
+7. **No consent banner**, while the privacy policy says cookies can be rejected. This becomes a real problem the moment an analytics id is set.
 8. **`SOCIAL_URLS` is empty**, so `sameAs` is omitted from the schema. Add the real profiles when they exist; an empty or invented `sameAs` is a broken identity claim.
+9. **The OG cards have `MONOKORO.CO` baked into the image.** If the domain changes, re-render them with `pnpm og` — it is pixels, not a tag.

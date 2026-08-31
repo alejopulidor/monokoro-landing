@@ -11,9 +11,12 @@ import {
 import { routing, type Locale } from "@/i18n/routing";
 import { SITE_URL } from "@/lib/config";
 import { organizationSchema, webSiteSchema } from "@/lib/schema";
+import { ogImage } from "@/lib/og";
 import { JsonLd } from "@/components/seo/json-ld";
 import { Aurora } from "@/components/site/aurora";
 import { SiteEffects } from "@/components/site/site-effects";
+import { Analytics, AnalyticsNoScript } from "@/components/site/analytics";
+import { AnalyticsEvents } from "@/components/site/analytics-events";
 
 /*
   The real document. `app/layout.tsx` above is a passthrough so this component
@@ -75,10 +78,17 @@ export async function generateMetadata({
       locale: "es_CO",
       type: "website",
       url: `${SITE_URL}/${locale}/`,
-      // TODO: add the social card once scripts/og/ has one rendered — one
-      // image per page, never shared. See "OG images" in CLAUDE.md.
+      images: ogImage(
+        "home",
+        "Monokoro — ahorra en dólares digitales desde WhatsApp",
+      ),
     },
-    twitter: { card: "summary_large_image" },
+    twitter: {
+      card: "summary_large_image",
+      title: t("title"),
+      description: t("description"),
+      images: ogImage("home", "Monokoro — dólares digitales por WhatsApp"),
+    },
   };
 }
 
@@ -100,6 +110,12 @@ export default async function LocaleLayout({
   return (
     <html lang={locale} className={`${sans.variable} ${mono.variable} h-full`}>
       <body className="min-h-full antialiased">
+        {/* Analytics first: the GTM no-script iframe has to be the first thing
+            in <body>, and the tag itself wants to run as early as possible.
+            Both render null while no id is configured — see lib/config.ts. */}
+        <AnalyticsNoScript />
+        <Analytics />
+
         {/* Monokoro is described once, here. Everything else on the page
             references it by @id — see lib/schema.ts. */}
         <JsonLd
@@ -123,6 +139,7 @@ export default async function LocaleLayout({
         </div>
 
         <SiteEffects />
+        <AnalyticsEvents />
       </body>
     </html>
   );

@@ -56,6 +56,25 @@ export const PRIVACY_EMAIL = "privacidad@monokoro.co";
  */
 export const SOCIAL_URLS: string[] = [];
 
+// ─── Analytics ────────────────────────────────────────────────────────────
+/**
+ * Leave both empty and **nothing is injected** — no script, no cookie, no
+ * network request. That is the state today.
+ *
+ * Use one or the other, not both: GTM can host the GA4 tag itself, and loading
+ * GA4 twice double-counts every pageview.
+ *
+ * - `GTM_ID`  — a Google Tag Manager container, `GTM-XXXXXXX`. This is what
+ *   the Tenko site uses, and the better default: tags are added in the GTM UI
+ *   without a deploy.
+ * - `GA4_ID`  — a GA4 measurement id, `G-XXXXXXXXXX`, loaded directly via
+ *   gtag.js. Simpler if GTM is more machinery than this site needs.
+ *
+ * TODO(business): see "Analytics" in CLAUDE.md for how to create either one.
+ */
+export const GTM_ID = "";
+export const GA4_ID = "";
+
 // ─── Dates ────────────────────────────────────────────────────────────────
 export const LEGAL_LAST_UPDATED_ISO = "2026-08-30";
 
