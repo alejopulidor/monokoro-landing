@@ -14,9 +14,9 @@ import { CARD_TIERS_SPECS } from "@/content/card";
 export function CardTiers() {
   return (
     <section className="sec-lg gutter">
-      <div className="mk-glow panel shell">
+      <div className="mk-glow panel shell" data-panel>
         <div className="mk-aur-b" aria-hidden />
-        <div className="mk-grid" aria-hidden />
+        <div className="mk-grid" data-parallax="0.04" aria-hidden />
         <div className="mk-spot" aria-hidden />
 
         <div className="relative flex flex-wrap gap-[clamp(32px,4vw,52px)] px-[clamp(24px,4vw,56px)] py-[clamp(30px,4.4vw,60px)]">

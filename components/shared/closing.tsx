@@ -40,7 +40,7 @@ export function Closing({
       >
         <div className="mk-aur-a" aria-hidden />
         <div className="mk-aur-b" aria-hidden />
-        <div className="mk-grid" aria-hidden />
+        <div className="mk-grid" data-parallax="0.04" aria-hidden />
         <div className="mk-spot" aria-hidden />
 
         <div className="relative flex flex-col items-center gap-[22px] px-[clamp(24px,4vw,48px)] py-[clamp(60px,9vw,104px)] text-center">

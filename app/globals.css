@@ -49,8 +49,24 @@
 }
 
 @layer base {
-  html {
-    scroll-behavior: smooth;
+  /**
+   * No `scroll-behavior: smooth` here, on purpose. Lenis animates `scrollTop`
+   * itself, and native smooth scrolling animates it too — two owners, and an
+   * anchor jump lands somewhere between the two. Reduced-motion visitors get
+   * no Lenis and an instant jump, which is the correct behaviour for them.
+   */
+
+  /**
+   * Every anchor target has to clear the sticky nav. Measured: 69px bar +
+   * 34px rate ticker = 103px, identical at 1440 and at 390.
+   *
+   * **Mirrored by `NAV_OFFSET` in lib/motion.ts.** This rule is the native /
+   * reduced-motion path; that constant is the Lenis path. If they disagree, an
+   * anchor lands in a different place depending on whether Lenis is running.
+   * Change both together.
+   */
+  [id] {
+    scroll-margin-top: 120px;
   }
   body {
     background: var(--color-paper);
@@ -149,13 +165,6 @@
 
   /* ─── Motion ───────────────────────────────────────────────────────────── */
 
-  @keyframes riseIn {
-    from { opacity: 0; transform: translateY(30px); }
-  }
-  @keyframes sheen {
-    0%        { transform: translateX(-150%) skewX(-16deg); }
-    55%, 100% { transform: translateX(280%) skewX(-16deg); }
-  }
   @keyframes floatY {
     0%, 100% { transform: translateY(0); }
     50%      { transform: translateY(-10px); }
@@ -191,63 +200,24 @@
     100% { transform: translateY(400%); }
   }
 
-  /* The card page's hero: the card falls in, overshoots, and settles. The
-     62% keyframe is the overshoot — without it the drop reads as a slide. */
-  @keyframes heroDrop {
-    0%   { opacity: 0; transform: translateY(-260px) rotateX(52deg) rotateZ(-18deg) scale(0.72); }
-    62%  { opacity: 1; transform: translateY(14px) rotateX(-6deg) rotateZ(2deg) scale(1.02); }
-    100% { opacity: 1; transform: translateY(0) rotateX(0) rotateZ(0) scale(1); }
-  }
-  /* Its ground shadow, timed to the same curve so the card looks like it lands
-     on something rather than in front of it. */
-  @keyframes shadowIn {
-    0%   { opacity: 0; transform: scale(0.5); }
-    62%  { opacity: 0.55; transform: scale(1.06); }
-    100% { opacity: 0.4; transform: scale(1); }
-  }
-  @keyframes stackDrop {
-    from { opacity: 0; transform: translateY(-90px) rotateZ(-10deg) scale(0.86); }
-    to   { opacity: 1; transform: translateY(0) rotateZ(0) scale(1); }
-  }
-  /* Same idea as stackDrop but played on mount, for the fanned pair in the
-     business hero — which is above the fold and has nothing to wait for. */
-  @keyframes fanDrop {
-    from { opacity: 0; transform: translateY(-110px) rotateZ(-14deg) scale(0.84); }
-    to   { opacity: 1; transform: translateY(0) rotateZ(0) scale(1); }
-  }
-
-  /* Mount-time entrance for above-the-fold content. Stagger with an inline
-     `animation-delay`; there is no scroll trigger here because the hero is
-     already in view. */
-  .hero-in {
-    animation: riseIn 0.85s cubic-bezier(0.2, 0.85, 0.25, 1) both;
-  }
-
   /**
-   * Scroll reveal. Starts hidden and is switched on by adding `.in`, which
-   * `components/site/site-effects.tsx` does from one shared IntersectionObserver.
+   * `.hero-in` and `.rv` have **no rule here, on purpose.** They are pure JS
+   * hooks now: `heroIntro()` and `reveal()` in components/motion/effects.ts
+   * set the from-state themselves.
    *
-   * It is a *transition*, not an animation, on purpose: a transition that never
-   * fires leaves the element at its start value, so the reduced-motion block
-   * below has to neutralize the start state rather than just stop a timeline.
+   * **Do not add `opacity: 0` back.** That is where it used to live, and it
+   * meant 31 elements on the home page, 43 on /tarjeta and 55 on /negocios
+   * were invisible to anyone whose JavaScript did not run — including a
+   * crawler that does not execute it. GSAP hides only what it has measured as
+   * below the fold, so the static HTML is complete and the worst a broken
+   * measurement can do is skip an animation.
    */
-  .rv {
-    opacity: 0;
-    transform: translateY(28px);
-    transition:
-      opacity 0.8s cubic-bezier(0.2, 0.85, 0.25, 1),
-      transform 0.8s cubic-bezier(0.2, 0.85, 0.25, 1);
-  }
-  .rv.in {
-    opacity: 1;
-    transform: none;
-  }
 
-  /* Magnetic hover. The transform is written by the pointermove handler in
-     site-effects; this rule only supplies the easing so it glides back. */
+  /* Magnetic hover. `transform` is deliberately **not** in this list: the
+     offset is written by `gsap.quickTo` in components/motion/effects.ts, and a
+     CSS transition on the same property would fight its easing. */
   .mk-mag {
     transition:
-      transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1),
       background 0.22s,
       color 0.22s,
       box-shadow 0.3s;
@@ -293,24 +263,179 @@
     background: rgba(255, 255, 255, 0.5);
   }
 
-  /**
-   * The two fanned cards in "individual vs empresarial". Scroll-triggered like
-   * `.rv`, but an *animation* rather than a transition, because each card also
-   * carries its own resting `rotate()` — a transition on `transform` would
-   * fight that inline rotation instead of composing with it.
-   *
-   * `SiteEffects` adds `.in`; the reduced-motion block at the end of this file
-   * cancels the start state.
-   */
-  .mk-stack { opacity: 0; }
-  .mk-stack.in { animation: stackDrop 0.95s cubic-bezier(0.2, 0.85, 0.25, 1) both; }
-
   .mk-lift {
     transition: transform 0.32s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.32s;
   }
   .mk-lift:hover {
     transform: translateY(-5px);
     box-shadow: 0 30px 60px -40px rgba(13, 46, 51, 0.7);
+  }
+
+  /* ─── The card face ───────────────────────────────────────── */
+
+  /**
+   * Registered so they can be interpolated. An unregistered custom property is
+   * an unanimatable token: `transition: --mk-lit` on one does nothing at all,
+   * and `calc()` on one inside `rgb()` is invalid at computed-value time. The
+   * registration is what makes both work, and it is the whole reason the
+   * specular highlight can fade in instead of snapping.
+   */
+  @property --mk-mx {
+    syntax: "<percentage>";
+    inherits: true;
+    initial-value: 26%;
+  }
+  @property --mk-my {
+    syntax: "<percentage>";
+    inherits: true;
+    initial-value: 12%;
+  }
+  @property --mk-lit {
+    syntax: "<number>";
+    inherits: true;
+    initial-value: 0;
+  }
+
+  /**
+   * The card, drawn in five layers. Source order does not decide the stack —
+   * every layer carries an explicit `z-index`, because the content is a normal
+   * child and the two decorative layers are pseudo-elements, and getting that
+   * order by accident is how the grain ends up over the type.
+   *
+   *   0  the embossed isotipo watermark  (a child <svg>)
+   *   1  the specular highlight          (a child div, .card-lit)
+   *   2  the grain                       (::before)
+   *   3  the bevel                       (::after)
+   *   4  the content                     (a child div)
+   *
+   * `isolation: isolate` is not optional: the grain blends with `overlay`, and
+   * without a stacking context of its own it would reach past the card and
+   * blend with the panel behind it.
+   */
+  .card-face {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    /* ISO/IEC 7810 ID-1 — the ratio a real card has, and what makes this read
+       as a card rather than as a rounded rectangle. */
+    aspect-ratio: 1.585;
+    color: var(--color-onDark);
+    /**
+     * A closed, dark value ramp.
+     *
+     * The old two-stop gradient ended on `#4FB89E`, and the mint SALDO figure
+     * sits exactly there — measured at **1.6:1**, a real contrast failure that
+     * shipped, not a taste call. Ending dark fixes the figure and also fixes
+     * the material: highlights only read as *light* when the base is dark
+     * enough that they have somewhere to come from.
+     */
+    background:
+      radial-gradient(
+        112% 84% at 14% 4%,
+        rgba(106, 221, 155, 0.26),
+        transparent 54%
+      ),
+      radial-gradient(94% 116% at 96% 100%, rgba(0, 0, 0, 0.32), transparent 58%),
+      linear-gradient(142deg, #175057 0%, #0f353c 44%, #082227 100%);
+    /* Only the intensity is transitioned. The position tracks the pointer
+       frame by frame, so easing it as well would read as lag. */
+    transition: --mk-lit 0.45s ease;
+  }
+
+  /* Grain. ~4% of an `feTurbulence` tile, blended `overlay`, and it is the
+     single cheapest thing that stops a CSS gradient looking like a CSS
+     gradient. Inset negative so the tile's edge never lands on the card's. */
+  .card-face::before {
+    content: "";
+    position: absolute;
+    inset: -12%;
+    z-index: 2;
+    pointer-events: none;
+    opacity: 0.045;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23g)'/%3E%3C/svg%3E");
+  }
+
+  /**
+   * The bevel — its own layer, deliberately not a `box-shadow` on the root.
+   * Two call sites override the root's shadow with `!shadow-[...]` to get their
+   * own drop, and an inset bevel declared alongside it would go with it. Here
+   * it survives.
+   */
+  .card-face::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    pointer-events: none;
+    border-radius: inherit;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.26),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.5),
+      inset 0 0 0 1px rgba(106, 221, 155, 0.14);
+  }
+
+  /**
+   * The specular highlight, which replaces a white bar that swept the card on
+   * a 6.5s infinite loop — the most recognisable tell of a template card.
+   *
+   * `--mk-lit: 0` is a **finished look, not a fallback**: a fixed, discreet
+   * highlight at the top left. That matters because app/not-found.tsx renders
+   * outside the locale layout and mounts no motion at all, so this static
+   * state is the only one that card will ever have. Same for a touch screen,
+   * where there is no pointer to follow.
+   */
+  .card-lit {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    border-radius: inherit;
+    background: radial-gradient(
+      46% 66% at var(--mk-mx) var(--mk-my),
+      rgba(255, 255, 255, calc(0.09 + 0.2 * var(--mk-lit))),
+      rgba(255, 255, 255, calc(0.02 + 0.05 * var(--mk-lit))) 44%,
+      transparent 68%
+    );
+  }
+
+  /**
+   * The EMV chip. Not in the design canvas and not in git history — designed
+   * here, because a card without one reads as a graphic of a card.
+   *
+   * Four gold stops rather than two: a chip is stamped metal, and a two-stop
+   * gradient is the same tell as the old card face had. The contact lines are
+   * two horizontals and one vertical; at 38px anything more turns to mud.
+   */
+  .card-chip {
+    position: relative;
+    border-radius: 4px;
+    background-image:
+      linear-gradient(
+        to bottom,
+        transparent 0 30%,
+        rgba(58, 42, 10, 0.38) 30% 33%,
+        transparent 33% 64%,
+        rgba(58, 42, 10, 0.38) 64% 67%,
+        transparent 67%
+      ),
+      linear-gradient(
+        to right,
+        transparent 0 48%,
+        rgba(58, 42, 10, 0.26) 48% 52%,
+        transparent 52%
+      ),
+      linear-gradient(
+        135deg,
+        #efe0ad 0%,
+        #b2914c 34%,
+        #f6eecb 58%,
+        #8f7134 100%
+      );
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.6),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.4),
+      0 1px 2px rgba(0, 0, 0, 0.45);
   }
 
   /* ─── Dark panel decoration ────────────────────────────────────────────── */
@@ -361,7 +486,11 @@
     pointer-events: none;
     opacity: 0;
     transition: opacity 0.5s;
-    background: radial-gradient(320px circle at 50% 50%, rgba(106, 221, 155, 0.16), transparent 62%);
+    background: radial-gradient(
+      340px circle at var(--mk-x, 50%) var(--mk-y, 50%),
+      rgba(106, 221, 155, 0.17),
+      transparent 62%
+    );
   }
 
   /* The dark panel itself. */
@@ -482,6 +611,12 @@
 
   /* ─── Misc ─────────────────────────────────────────────────────────────── */
 
+  /* Past 24px of scroll, `navCompact()` toggles `.nav-compact` on <html>. The
+     shadow itself belongs here: JS should decide *when*, never *what*. */
+  .nav-compact #mk-nav {
+    box-shadow: 0 18px 40px -34px rgba(13, 46, 51, 0.8);
+  }
+
   .no-scrollbar {
     scrollbar-width: none;
     -ms-overflow-style: none;
@@ -491,75 +626,49 @@
   }
 }
 
-/* ─── Unlayered: start states that must win ────────────────────────────── */
-
-/* These two carry the *initial* frame of a JS-driven animation. They are
-   deliberately outside the layer so no utility can flatten them, and so the
-   reduced-motion block at the end of this file can cancel them. */
-
-/**
- * The card in the "Tarjeta Monokoro" section. It starts tilted away and off
- * the top, and `SiteEffects` writes opacity + transform as it scrolls in.
- *
- * The start state lives here rather than in JS so the very first paint is
- * already correct — otherwise the card flashes flat before the first scroll
- * frame lands. The reduced-motion block at the bottom of this file cancels it.
- */
-#mk-card {
-  opacity: 0;
-  will-change: transform;
-  transform: translateY(-120px) rotateX(38deg) rotateZ(-13deg) scale(0.82);
-}
-
-/* The connector between the three "cómo funciona" steps. Drawn from the left
-   as the row reveals; `SiteEffects` adds `.in`. */
-#mk-line {
-  transform: scaleX(0);
-  transform-origin: left;
-  transition: transform 1.2s cubic-bezier(0.2, 0.85, 0.25, 1);
-}
-#mk-line.in {
-  transform: scaleX(1);
-}
+/* ─── Unlayered: the one thing that must beat an inline style ──────── */
 
 /**
  * Reduced motion.
  *
- * `.rv` and the card need their *start* state neutralized, not just their
- * animation stopped: both begin at opacity 0, so removing the timeline alone
- * would leave the page blank. The card's inline transform is written by JS,
- * which also checks the media query — see components/site/site-effects.tsx.
+ * This block used to also neutralize a pile of CSS *start states* — `.rv`
+ * parked at `opacity: 0`, `#mk-card` parked tilted off the top, `#mk-line` at
+ * `scaleX(0)`, `.mk-stack` at zero. All of them are gone: GSAP sets every
+ * from-state now and only on elements it has measured below the fold, so under
+ * reduced motion, where GSAP never runs at all, there is simply nothing to
+ * cancel. **The reduced-motion page is the same page, not a repaired one.**
+ *
+ * What is left is the wildcard, and it earns its `!important`. Twelve of this
+ * site's looping animations are declared as inline `style={{ animation }}` —
+ * the two auroras (twice each, since the 404 renders its own document), the
+ * floating cards, the rate marquee, the panel scanline, the typing dots, the
+ * status ring. A named selector cannot reach an inline declaration, so before
+ * this rule the "reduced motion" page still had the background drifting, a
+ * marquee scrolling and a scanline sweeping. `!important` in a stylesheet is
+ * the one thing that outranks an inline style, which is why this is a wildcard
+ * and not eight new classes: eight classes would fix today's twelve and
+ * silently miss the thirteenth.
+ *
+ * `.01ms` rather than `0s` because a zero duration makes some engines skip the
+ * animation instead of applying its fill. At this duration with
+ * `animation-iteration-count: 1`, every one of them parks on its final
+ * keyframe — checked one by one: `floatY` ends at `translateY(0)`, `scanline`
+ * ends off-panel, `pulseRing` ends invisible over the solid dot beneath it,
+ * `blinkDot` ends dim but present, and the entrance animations end on the state
+ * they were entering.
+ *
+ * The single intentional exception is the reading-progress bar, which starts at
+ * `scaleX(0)` inline and stays there. A progress bar with nothing tracking the
+ * scroll *should* be absent — it is chrome, not content.
  */
 @media (prefers-reduced-motion: reduce) {
-  .rv {
-    opacity: 1;
-    transform: none;
-    transition: none;
-  }
-  .hero-in {
-    animation: none;
-  }
-  #mk-card {
-    opacity: 1;
-    transform: none;
-  }
-  #mk-line {
-    transform: scaleX(1);
-    transition: none;
-  }
-  .mk-stack,
-  .mk-stack.in {
-    opacity: 1;
-    animation: none;
-  }
-  .card-drop,
-  .card-drop-shadow {
-    opacity: 1;
-    animation: none;
-    transform: none;
-  }
-  .mk-aur-a,
-  .mk-aur-b {
-    animation: none;
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0s !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    transition-delay: 0s !important;
   }
 }

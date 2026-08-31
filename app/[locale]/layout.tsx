@@ -14,7 +14,7 @@ import { organizationSchema, webSiteSchema } from "@/lib/schema";
 import { ogImage } from "@/lib/og";
 import { JsonLd } from "@/components/seo/json-ld";
 import { Aurora } from "@/components/site/aurora";
-import { SiteEffects } from "@/components/site/site-effects";
+import { MotionProvider } from "@/components/motion/motion-provider";
 import { Analytics, AnalyticsNoScript } from "@/components/site/analytics";
 import { AnalyticsEvents } from "@/components/site/analytics-events";
 
@@ -125,10 +125,15 @@ export default async function LocaleLayout({
           ]}
         />
 
-        {/* The whole page sits in an `overflow-x: hidden` box: the aurora
-            blobs and the marquee are both wider than the viewport by design,
-            and without this they would add a horizontal scrollbar. */}
-        <div className="relative w-full overflow-x-hidden">
+        {/* `overflow-x: clip`, NOT `hidden`. The aurora blobs and the rate
+            marquee are both wider than the viewport by design and need the
+            horizontal overflow contained — but `overflow-x: hidden` forces
+            `overflow-y: auto`, which makes this div a scroll container and
+            silently kills `position: sticky` on every descendant, the nav
+            included. Measured before the fix: the nav's top went from 0 to
+            -1359 after scrolling 1500px. `clip` crops without creating a
+            scroll container. */}
+        <div className="relative w-full overflow-x-clip">
           <Aurora />
           {/* z-10 lifts the content above the fixed aurora layer. */}
           <div className="relative z-10">
@@ -138,7 +143,10 @@ export default async function LocaleLayout({
           </div>
         </div>
 
-        <SiteEffects />
+        {/* Outside NextIntlClientProvider on purpose — the provider needs no
+            locale and no messages, and next-intl's navigation hooks throw
+            during the prerender when used above their own provider. */}
+        <MotionProvider />
         <AnalyticsEvents />
       </body>
     </html>

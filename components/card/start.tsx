@@ -32,8 +32,13 @@ export function CardTopUp() {
               tone="dark"
               label="TASA TARJETA"
               value={`$ ${fmtCOP(RATE_CARD)}`}
+              count={RATE_CARD}
             />
-            <RateCard label="COMPRA DE DÓLARES" value={`$ ${fmtCOP(RATE_BUY)}`} />
+            <RateCard
+              label="COMPRA DE DÓLARES"
+              value={`$ ${fmtCOP(RATE_BUY)}`}
+              count={RATE_BUY}
+            />
           </div>
         </div>
       </div>

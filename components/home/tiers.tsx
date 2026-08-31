@@ -56,7 +56,11 @@ export function Tiers() {
               >
                 {t.tag}
               </span>
-              <span className="tnum text-[clamp(26px,3.4vw,38px)] font-semibold leading-none tracking-[-0.04em]">
+              <span
+                className="tnum text-[clamp(26px,3.4vw,38px)] font-semibold leading-none tracking-[-0.04em]"
+                data-count={t.cop}
+                data-count-format="cop"
+              >
                 $ {fmtCOP(t.cop)}
               </span>
               <span
@@ -64,7 +68,12 @@ export function Tiers() {
                   "tnum text-base",
                   t.featured ? "text-[rgba(239,246,240,0.72)]" : "text-[var(--color-muted)]",
                 )}
+                data-count={t.cop / RATE_BUY}
+                data-count-format="usd"
               >
+                {/* The prefix and the " USD" suffix are recovered from this
+                    string by `counters()`, so every intermediate frame reads
+                    the same way the server rendered it. */}
                 recibes ≈ {fmtUSD(t.cop / RATE_BUY)} USD
               </span>
               <span className="mt-1.5 flex items-center gap-2 text-[15px] font-medium">

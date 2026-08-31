@@ -38,7 +38,16 @@ So the test is the sentence's shape, not its words:
 - TypeScript 5.9, strict
 - `next-intl` v4 for routing/i18n — currently **es only** (see below)
 - Static export: `next.config.ts` has `output: "export"` + `trailingSlash: true`
-- **No animation library and no UI library.** Motion is CSS plus one shared client component. Adding `motion` or Radix back should need a reason.
+- **GSAP 3.15 + ScrollTrigger + Lenis 1.3 for motion.** No UI library. This
+  reverses the earlier "no animation library" rule, and the reason is written
+  down below under "Motion" — on this site the page *is* the product, and the
+  CSS-only version had accumulated 15 durations and 2 curves that nobody chose.
+  **Measured cost:** `/es/` downloads 252.8 KB gz of JS, of which the chunk
+  carrying GSAP + ScrollTrigger + Lenis and all of this site's motion code is
+  **50.0 KB gz**, isolated in one cacheable chunk shared by all five pages.
+  (An earlier estimate of ~16 KB in this file was wrong: it came from diffing
+  the totals of two different sites, which measures the difference between the
+  sites, not the cost of the libraries.) Adding Radix back still needs a reason.
 - Package manager: pnpm
 
 ## Where the design comes from
@@ -119,13 +128,23 @@ Two rules that keep this from rotting:
 - `lib/nav.ts` — every destination plus a `ready` flag, and the per-page nav lists. A product page's bar is a table of contents for that page; the site map lives in the footer.
 - `lib/format.ts` — `fmtCOP` / `fmtUSD`, hand-written. See "Things that look wrong but aren't".
 - `lib/schema.ts` + `components/seo/json-ld.tsx` — JSON-LD. Monokoro is declared **once**, in the locale layout under `ORG_ID`; everything else references it by `@id` instead of declaring a second organization. Crawlers merge every `ld+json` block on a page into one graph, which is what makes that work. `json-ld.tsx` exists only to centralize `.replace(/</g, "\\u003c")`, so no call site can forget it and let a `</script>` inside a string close the tag early.
-- `components/site/site-effects.tsx` — **all** page-wide motion, in one client component. See below.
+- `components/motion/*` — all page-wide motion. See "Motion" below; `components/site/site-effects.tsx` was deleted and must not come back.
 - `components/site/brand.tsx` — the isotipo. Two variants, not interchangeable: `duo` (mint + teal, the identity) and `solid` (one `fill-rule="evenodd"` path, for dark panels and the card face where the teal counter would vanish).
 - `components/home/whatsapp-demo.tsx` — the looping chat in the hero. The most intricate file here; read its header comment before touching it.
 - `components/home/quoter.tsx` — the calculator. Three independent amounts, not one shared field.
 - `app/icon.svg` — favicon (Next 16 picks it up automatically).
 - `app/sitemap.ts` / `app/robots.ts` — both `force-static` (required under `output: "export"`). The sitemap lists only indexable routes and appends articles from `content/posts.ts`, so publishing a post needs no second edit. `lastModified` is pinned to `CONTENT_UPDATED` in `lib/config.ts` rather than `new Date()` — a lastmod that moves on every deploy teaches Google to ignore the signal.
-- `app/not-found.tsx` — the branded 404 (`out/404.html`). Two things about it look odd and are structural: it **emits its own `<html>`/`<body>` and loads its own fonts** (the root layout is a passthrough, so nothing above it renders a document — same reason `app/page.tsx` does), and its **copy is hard-coded in Spanish** because it renders outside `[locale]/layout.tsx`, where there is no `NextIntlClientProvider` and `useTranslations` would throw.
+- `app/not-found.tsx` — the branded 404 (`out/404.html`). **It is the only
+  full-dark route on the site**, which is the canvas's decision, not a
+  variation: everything else is paper with dark panels inside, so inverting the
+  ground is what makes a 404 read as a different surface. The gradient is an
+  inline style on `<body>` because `@layer base body { background: ... }` would
+  otherwise win — an inline declaration outranks every cascade layer. Its
+  visual is a ghost `404` numeral with the card tilted over it; the **card** is
+  in normal flow and the numeral is absolute behind it, the opposite of the
+  canvas, because at 390px the numeral clamps shorter than the card and an
+  absolutely positioned card landed on top of the WhatsApp button. Two more
+  things look odd and are structural: it **emits its own `<html>`/`<body>` and loads its own fonts** (the root layout is a passthrough, so nothing above it renders a document — same reason `app/page.tsx` does), and its **copy is hard-coded in Spanish** because it renders outside `[locale]/layout.tsx`, where there is no `NextIntlClientProvider` and `useTranslations` would throw.
 
 ## The CSS cascade layer — read this before adding a class
 
@@ -133,34 +152,241 @@ Everything in `app/globals.css` between the `@layer base` block and the unlayere
 
 Tailwind v4 declares `@layer theme, base, components, utilities`. **Unlayered CSS beats every one of them.** With `.btn { display: inline-flex }` unlayered, `class="btn min-[760px]:hidden"` did nothing — the custom class silently won over the utility. That was a real bug on the sticky mobile CTA, which showed on desktop.
 
-So: **new component classes go inside `@layer components`.** The only things that stay unlayered are `#mk-card`, `#mk-line` and the `prefers-reduced-motion` block at the end — those carry the *start state* of a JS-driven animation, or cancel one, and must beat everything.
+So: **new component classes go inside `@layer components`.** The only thing
+that stays unlayered now is the `prefers-reduced-motion` block at the end, and
+for a sharper reason than "must win": it has to beat **inline styles**, which no
+cascade layer can. See "Reduced motion" below.
 
-## Motion — one component drives all of it
+There used to be two more unlayered rules, `#mk-card` and `#mk-line`, carrying
+the start state of a JS-driven animation. Both are gone — GSAP sets every
+from-state now — and that is a deliberate, load-bearing deletion. Do not put
+one back.
 
-`components/site/site-effects.tsx` is mounted once in the locale layout, renders nothing, and installs **one** IntersectionObserver and **one** `pointermove` listener for the whole document. Everything else opts in by class name or id:
+## Motion
 
-| Hook | Effect |
+One provider, `components/motion/motion-provider.tsx`, mounted twice — in
+`app/[locale]/layout.tsx` (outside `NextIntlClientProvider`) and in
+`app/not-found.tsx`, which renders its own document. It renders `null`.
+
+`components/site/site-effects.tsx` is **gone**. Do not resurrect it; what it did
+is spread across five files on purpose:
+
+| File | Responsibility |
 | --- | --- |
-| `.rv` | scroll reveal — gets `.in` on entry, once. Delay staggers by document order in groups of four. |
-| `.mk-mag` | magnetic button; follows the pointer a few px. Disabled under 760px — there is no hover on a touch screen. |
-| `.mk-glow` + a `.mk-spot` child | cursor spotlight on a dark panel. |
-| `#mk-nav` | grows a shadow past 24px of scroll. |
-| `#mk-prog` | reading-progress bar (article pages). |
-| `#mk-card` | the 3D tilt on the card, driven by its position in the viewport. |
-| `#mk-line` | the connector between the three steps. |
+| `lib/motion.ts` | Every number: `EASE`, `DUR`, `STAGGER`, `SCRUB`, `MQ`, `NAV_OFFSET`. Nothing invents its own. |
+| `components/motion/gsap.ts` | The only `registerPlugin(ScrollTrigger)` call on the site. |
+| `components/motion/lenis-instance.ts` | The live instance, so `nav.tsx` can `stop()`/`start()` behind the mobile sheet without importing GSAP into its chunk. |
+| `components/motion/claim.ts` | `claim()` / `unclaim()` / `reap()` — the idempotency and cleanup primitives. |
+| `components/motion/effects.ts` | One function per effect, each reading the DOM and returning how many elements it wired. |
+| `components/motion/motion-provider.tsx` | Mount point, Lenis wiring, the anchor handler, and the sync loop. |
 
-Those ids are the contract between the CSS, the markup and that file. Renaming one silently kills the effect — nothing throws.
+### The discipline, which matters more than the library
 
-`.rv` is a **transition**, not an animation, which is why the reduced-motion block has to reset `opacity`/`transform` rather than just stop a timeline: a transition that never fires leaves the element parked at `opacity: 0`, i.e. a blank page.
+> **One loud moment per page, everything else restrained.** Ten animations that
+> each picked their own duration and curve is what makes a page read as
+> generated — not too little motion.
 
-### Two things about it that were bugs, and must not be undone
+Before `lib/motion.ts` existed this site had **15 durations and 2 curves**, with
+values that differed by 0.02s for no reason (0.3 / 0.32 / 0.35) and background
+auroras that ran 24s from a CSS class but 32s from the inline style beside it.
+Now: three eases, five durations, three staggers.
 
-- **It watches the DOM, not the route.** App Router navigations swap the page's markup without remounting the layout, so an observer wired up once at mount never sees the next page's elements: they stay invisible and the page arrives with only its hero (`.hero-in` needs no observer). Keying the effect on `usePathname` *looks* like the fix and is not — measured, the router updates the pathname before the new segment commits on the first navigation, so the sweep runs against the outgoing DOM. A `MutationObserver` sidesteps the race. It is deliberately **not** debounced through `requestAnimationFrame`: a starved frame callback meant a whole page never got observed, and `MutationObserver` already batches by microtask.
-- **The stagger defers the class, it does not set `transition-delay`.** An inline delay survives the reveal and then applies to that element's *next* transition — `.mk-lift` cards took a quarter second to react to hover long after they had appeared. The delay is also computed from what enters *together* and sorted by position, so a row ripples left-to-right on a desktop and each card starts immediately when the same three are stacked on a phone.
+| Page | The loud moment | Everything else |
+| --- | --- | --- |
+| `/es/` | the WhatsApp conversation in the hero | a `DUR.enter` fade-up |
+| `/es/tarjeta/` | the card drops, then tilts with the scroll | a fade-up |
+| `/es/negocios/` | the card fan opening | a fade-up |
 
-### Measuring any of this
+### The from-state guarantee — the most important rule here
 
-`--virtual-time-budget` starves both `IntersectionObserver` callbacks and `requestAnimationFrame`, so a headless harness will report reveals that never happened and misses that are not real. Instrument the mechanism instead of the result: patch `IntersectionObserver.prototype.observe` inside a same-origin iframe (the prototype, not the constructor — the site builds its observer once, before any patch you install after `load`) and count calls per navigation.
+**GSAP sets every from-state. CSS sets none.** `reveal()` measures each element
+and only hides the ones below the fold.
+
+This replaced `.rv { opacity: 0 }` in the stylesheet, which meant **31 elements
+on the home page, 43 on /tarjeta and 55 on /negocios were invisible to anyone
+whose JavaScript did not run** — including a crawler that does not execute it.
+Three properties follow, and all three are the point:
+
+- No JS at all → every element has zero styles from us and the page is
+  *complete*.
+- A wrong measurement → the element measures near `top: 0`, is judged not below
+  the fold, and is left alone. **The failure mode is "no animation", never
+  "invisible".** That is what makes it safe to run the sync loop synchronously
+  from a MutationObserver, before layout has settled.
+- `mm.revert()` on a breakpoint flip removes the inline opacity GSAP added.
+
+The single exception is `#mk-prog`, the reading-progress bar, which starts at
+`scaleX(0)` inline. A progress bar with nothing tracking the scroll *should* be
+absent — it is chrome, not content. Say so if you touch it.
+
+### The hooks
+
+Existing classes and ids were kept as hooks rather than renamed to `data-*`,
+because renaming 37 `.rv` call sites buys nothing: the load-bearing property is
+"no CSS from-state", and the guard for that lives as a comment in
+`app/globals.css` exactly where someone would re-add it.
+
+| Hook | Effect | Mode |
+| --- | --- | --- |
+| `.rv` | `reveal` — batched fade-up | fired, once |
+| `.hero-in` | `heroIntro` — staggered, on `fonts.ready` raced with 1200ms | mount |
+| `#mk-card` | `cardTilt` — **transform only, never opacity** | scrubbed |
+| `.card-drop` + `.card-drop-shadow` | `cardDrop` — one timeline, `EASE.pop` | mount |
+| `[data-fan]` + `[data-fan-card]` | `cardFan` — `data-fan-mode="mount"` opens on load, otherwise on scroll | both |
+| `#mk-line`, `[data-rule]` | `rules` — hairlines drawing themselves | scrubbed |
+| `[data-parallax="0.04"]` | `parallax` — the six `.mk-grid` layers | scrubbed |
+| `[data-panel]` | `panels` — dark panels settling in | scrubbed |
+| `[data-count]` + `[data-count-format]` | `counters` | fired, once |
+| `#mk-nav` | `navCompact` — toggles `.nav-compact` on `<html>`; CSS owns the shadow | scroll |
+| `#mk-prog` | `progress` | scrubbed |
+| `.mk-mag` | `magnetic` — `gsap.quickTo` | pointer |
+| `.mk-glow` + `.mk-spot` | `spotlight` — writes `--mk-x` / `--mk-y` | pointer |
+| `.card-face` | `cardLight` — writes `--mk-mx` / `--mk-my` / `--mk-lit` | pointer |
+
+There is deliberately **no step effect** on `components/shared/colored-steps.tsx`,
+even though a per-index trigger offset is the right shape for three cards that
+share a top edge. Those `<li>`s already carry `.rv`, so it would put two tweens
+on one element's `y`. The reason is written out in `effects.ts` where the
+function would have gone.
+
+Two matchMedia branches, one `mm`: `MQ.motion` runs the scroll effects plus
+Lenis, `MQ.motion and MQ.hover` runs the three pointer ones. `MQ.hover` is a **capability**
+test, not a width test — the old `innerWidth > 760` check was wrong in both
+directions on a touch laptop.
+
+### Client navigation — the part with no reference implementation
+
+A client navigation swaps the markup without remounting the layout. Three
+separate problems, and `ScrollTrigger.refresh()` solves only one:
+
+1. **New elements get no triggers.** `refresh()` recalculates `start`/`end` for
+   triggers that exist; it does not scan the DOM.
+2. **Old triggers point at detached nodes.** `getBoundingClientRect()` on a
+   removed element returns all zeros, so `start === end === 0`: the trigger
+   fires immediately and forever, and leaks. `reap()` is the guard, and without
+   it the symptom appears on the **second** navigation, not the first.
+3. **Surviving triggers have stale positions**, because the page height changed.
+
+So the order is fixed: **reap → wire → refresh.**
+
+The signal is a `MutationObserver`, not the pathname — measured, the router
+updates the pathname *before* the new segment commits on the first navigation,
+so a pathname-keyed sweep runs against the outgoing DOM. That was the reported
+bug ("on mobile the blog only loaded the first text"). It is deliberately **not**
+debounced through `requestAnimationFrame`: a starved frame left a whole page
+unanimated, and MutationObserver already batches by microtask.
+
+That is only affordable because the reaction is incremental. **Three of the five
+pages animate a chat mock that appends bubbles forever**, so this observer fires
+every 0.7–4.4 seconds for as long as the tab is open. Two things keep it cheap:
+
+- `claim()` writes a `data-mk-<key>` flag, so re-running the whole list is one
+  `querySelectorAll` per effect when nothing is new. **One flag per effect, not
+  one shared flag** — elements overlap (a `.rv` inside a `[data-panel]`), and a
+  single marker would hide an element from every effect but the first.
+- `if (killed || wired) ScrollTrigger.refresh()`. Without that gate the chat
+  mocks would force a full refresh every second, forever.
+
+`unclaim()` in the branch teardown is easy to forget and will look like a random
+resize bug: `mm.revert()` kills tweens but leaves the flags, so a branch turning
+back on would find everything claimed and wire nothing.
+
+### Anchors
+
+Three things used to fight over an anchor jump; exactly one owns it now.
+
+- `html { scroll-behavior: smooth }` is **deleted**. Lenis animates `scrollTop`
+  and so does native smooth scroll; two owners land between the two.
+- `[id] { scroll-margin-top: 120px }` in `@layer base` is the native /
+  reduced-motion path. **It must equal `NAV_OFFSET` in `lib/motion.ts`**, which
+  is the Lenis path. Measured nav: 69px bar + 34px ticker = 103px, identical at
+  1440 and 390. Change both together.
+- The provider's delegated handler calls `lenis.scrollTo(**number**)`, computed
+  as `getBoundingClientRect().top + window.scrollY - NAV_OFFSET`. Passing the
+  *element* makes Lenis use `offsetTop`, measured against the offsetParent
+  rather than the document, and every anchor lands low. It also does its own
+  `history.pushState`, because Lenis's built-in `anchors: { offset }` swallows
+  the click without updating the URL and breaks the back button.
+
+### Reduced motion
+
+Under `prefers-reduced-motion: reduce` no branch runs: Lenis is never
+constructed, no ScrollTrigger exists, nothing transforms. **It is the same page,
+not a repaired one** — which the from-state guarantee gives for free.
+
+What is left in `globals.css` is one unlayered wildcard, and it earns its
+`!important`. **Twelve of this site's looping animations are inline
+`style={{ animation }}`** — the two auroras (twice each, since the 404 renders
+its own document), the floating cards, the rate marquee, the panel scanline, the
+typing dots, the status ring. A named selector cannot reach an inline
+declaration, so before that rule the "reduced motion" page still had the
+background drifting, a marquee scrolling and a scanline sweeping. `!important`
+in a stylesheet is the one thing that outranks an inline style, which is why it
+is a wildcard and not eight new classes: eight classes would fix today's twelve
+and silently miss the thirteenth.
+
+`.01ms`, not `0s`: a zero duration makes some engines skip the animation instead
+of applying its fill. Every one of the twelve was checked individually for where
+it parks.
+
+### Two traps that will cost an afternoon
+
+- **`overflow-x: hidden` kills `position: sticky` on every descendant.** It
+  forces `overflow-y` to compute to `auto`, which makes the element a scroll
+  container. This was live: measured, `#mk-nav`'s top went from 0 to **-1359**
+  after scrolling 1500px on all five pages. Both wrappers are
+  `overflow-x: clip` now, which crops without creating a container.
+- **Tailwind v4's `rotate-*` compiles to the standalone `rotate:` property**,
+  not to `transform`. That is *useful* and is used deliberately: `cardFan`
+  animates the wrapper's transform while the resting `rotate-[-6deg]` stays on
+  the card, and the 404's float and tilt compose the same way. Do not
+  "simplify" either by moving the rotation into GSAP.
+- Related: **a filled CSS animation beats an inline style**, so a GSAP transform
+  tween on `.mk-aur-a` / `.mk-aur-b` would silently do nothing. `parallax` is
+  pointed at `.mk-grid` and never at the aurora.
+
+## The card face
+
+`components/shared/card-face.tsx` plus `.card-face` / `.card-lit` / `.card-chip`
+in `app/globals.css`. Five layers with an **explicit `z-index` each**, because
+the content is a normal child and two layers are pseudo-elements:
+
+```
+0  the embossed isotipo watermark   (a child <svg>)
+1  the specular highlight            (.card-lit)
+2  the grain                         (::before, mix-blend-mode: overlay)
+3  the bevel                         (::after)
+4  the content                       (a child div)
+```
+
+- **`isolation: isolate` is not optional.** The grain blends with `overlay`;
+  without a stacking context of its own it reaches past the card.
+- **The bevel is its own layer, not a `box-shadow` on the root.** Two call sites
+  override the root shadow with `!shadow-[...]` for their own drop, and an inset
+  bevel declared there would go with it.
+- **The value ramp ends dark, and that fixed a real contrast failure.** The old
+  `linear-gradient(140deg,#0D2E33,#2C7A80 60%,#4FB89E)` put the mint SALDO
+  figure on `#48AB98` — measured **1.65:1**. The new ramp measures **9.78:1** at
+  the same spot, and ~5.3:1 at the card's worst point, where the watermark's
+  plate lightens the ground. Both above 4.5:1.
+- **The watermark is a plate plus two offset *strokes*, not two offset fills.**
+  The first attempt was two translucent copies of the shape on the theory that
+  the light one would cover the dark one except for a sliver. Translucent fills
+  cover nothing: 7.5% white over 24% black is still 24% black, and it rendered
+  as one dark blob. A stroke paints only the outline, so the slivers are real.
+- **`MONOKORO_SOLID_D` is inlined, not `<MonokoroMark>`.** The component emits
+  hard `width`/`height` attributes, so it can neither be sized in percentages
+  nor cross an edge.
+- **`role="img"` collapses the subtree**, so the holder and balance rendered
+  inside are unreachable no matter that they are real text. `aria-label` is
+  assembled from the same props the card draws, so the two cannot drift. An
+  earlier comment in this file claimed the card's text was reachable; it was not.
+- **`watermark={false}` on the co-branded card** in `components/business/sections.tsx`.
+  That section's whole claim is that the face is the client's.
+- The three custom properties are **registered with `@property`**. An
+  unregistered custom property cannot be transitioned and cannot be used in
+  `calc()` inside `rgb()`; the registration is what lets `--mk-lit` fade instead
+  of snapping.
 
 ## Things that look wrong but aren't
 
@@ -262,7 +488,38 @@ The build emits 17 routes: `/`, `/_not-found`, `/es`, `/es/aprende`, three artic
 Two traps, both hit while building it:
 
 - **Chrome headless on Windows will not go below ~500px of window width.** `--window-size=390,2600` renders at ~500px and crops to 390, so the page *looks* like it overflows when it does not. To check a phone layout, load the page in a **same-origin iframe** sized to 390px from a harness in `out/`, and screenshot the harness.
-- **`--virtual-time-budget` does not reliably finish `.rv` transitions**, so a plain screenshot catches half-revealed sections. Add `--force-prefers-reduced-motion` when what you want is the static layout — the reduced-motion block renders everything in its final state.
+- **`--virtual-time-budget` starves `requestAnimationFrame`**, which is what
+  GSAP's ticker runs on — so with it every scrubbed tween freezes at whatever
+  progress it had and a screenshot proves nothing about an animation. Add
+  `--force-prefers-reduced-motion` when what you want is the static layout: no
+  branch runs, so the page renders in its finished state with no timing to race.
+
+### Driving the page over CDP
+
+Worth reading before writing another harness — three of these each cost an hour:
+
+- **Chrome launched from Node's `spawn` ignores its URL argument** and opens
+  `chrome://newtab/`. Launched from the shell with the URL last, it works. So
+  let the shell launch it and have the script only attach.
+- **`Page.navigate` leaves the session unanswered.** After one, the very first
+  `Runtime.evaluate` never returns — confirmed with a plain `1 + 1`, on a
+  page-target socket and on a flattened browser session alike. One Chrome per
+  page instead. A client-navigation check needs no CDP navigation anyway: click
+  the real link, which is how a visitor gets there.
+- **Node's built-in global `WebSocket` gets no reply from the DevTools
+  endpoint.** It opens the connection and then nothing comes back. The `ws`
+  package works against the same endpoint immediately. Install it in the
+  scratchpad, not in this project.
+- **Scroll with `Input.dispatchMouseEvent` wheel events, not `window.scrollTo`.**
+  Lenis intercepts wheel and ignores a programmatic `scrollTop`, so `scrollTo`
+  exercises a path no user takes.
+- **Instrument the mechanism, not the result.** `claim()` writes `data-mk-<key>`
+  attributes into the DOM, so counting them says exactly what each effect wired
+  without exposing anything from the bundle for a test. Cheaper and more
+  trustworthy than inferring from computed styles.
+- Give each headless run its own `--user-data-dir`, or concurrent runs fail
+  silently on the profile lock. And **never `taskkill /F /IM chrome.exe`** to
+  clean up — it closes the user's own browser too. Kill by PID.
 
 Measure overflow rather than eyeballing it: an iframe harness that reports `documentElement.scrollWidth` and lists elements whose `getBoundingClientRect().right` exceeds the viewport is worth the two minutes.
 

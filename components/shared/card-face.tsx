@@ -1,10 +1,9 @@
-import { MonokoroMark } from "@/components/site/brand";
+import { MONOKORO_SOLID_D, MonokoroMark } from "@/components/site/brand";
 import { cx } from "@/lib/cx";
 
 /**
  * The Monokoro card, drawn in the DOM rather than shipped as an image: it stays
- * crisp at any size, costs no request, and the holder/balance are real text
- * that a screen reader can reach.
+ * crisp at any size and costs no request.
  *
  * The aspect ratio is **1.585** — the ISO/IEC 7810 ID-1 ratio a real card has,
  * which is what makes it read as a card and not as a rounded rectangle.
@@ -15,6 +14,18 @@ import { cx } from "@/lib/cx";
  * `size` only changes type and padding; the geometry is identical, so the same
  * component serves the home page's inset card, the card page's hero drop, and
  * the little fanned pair in "individual vs empresarial".
+ *
+ * **Accessibility.** `role="img"` on the root makes the whole subtree
+ * unreachable — a screen reader announces the label and nothing else, so the
+ * holder and balance rendered inside are invisible to it no matter that they
+ * are real text. That is correct for an illustration, and it means the label
+ * has to carry the entire reading. `aria-label` below is assembled from the
+ * same props the card draws, so the two cannot drift.
+ *
+ * **The material lives in `app/globals.css`** (`.card-face`, `.card-lit`,
+ * `.card-chip`) rather than in Tailwind utilities, because it is five stacked
+ * layers with an explicit z-order, a blend mode and a registered custom
+ * property. Read the comment there before changing any of it.
  */
 export function CardFace({
   label,
@@ -23,6 +34,7 @@ export function CardFace({
   last4 = "4821",
   size = "md",
   compact = false,
+  watermark = true,
   className,
 }: {
   /** Mono tag top-right: "USD", "INDIVIDUAL", "EMPRESARIAL". */
@@ -34,61 +46,97 @@ export function CardFace({
   /** Drops the masked PAN's leading groups and the holder/balance row, for the
    *  small stacked cards where they would be illegible anyway. */
   compact?: boolean;
+  /** The embossed isotipo behind the content. **Off for the co-branded card on
+   *  /negocios** — that one is the client's brand, and stamping Monokoro's mark
+   *  across it contradicts the whole point of the section. */
+  watermark?: boolean;
   className?: string;
 }) {
   const lg = size === "lg";
 
+  // Everything the card says, in one string, because role="img" hides the rest.
+  const reading = [
+    `Tarjeta Monokoro ${label}`,
+    `terminada en ${last4}`,
+    holder ? `a nombre de ${holder}` : null,
+    balance ? `saldo de ejemplo ${balance}` : null,
+  ]
+    .filter(Boolean)
+    .join(", ");
+
   return (
     <div
       className={cx(
-        "relative overflow-hidden border border-[rgba(106,221,155,0.28)]",
+        "card-face",
         lg
           ? "rounded-[24px] shadow-[0_54px_100px_rgba(3,20,24,.65)]"
           : "rounded-[22px] shadow-[0_44px_84px_rgba(3,20,24,.6)]",
         className,
       )}
-      style={{
-        aspectRatio: "1.585",
-        background:
-          "linear-gradient(140deg,#0D2E33 0%,#2C7A80 60%,#4FB89E 100%)",
-      }}
       role="img"
-      aria-label={
-        holder
-          ? `Tarjeta Monokoro ${label} de ${holder}, con saldo de ejemplo`
-          : `Tarjeta Monokoro ${label}`
-      }
+      aria-label={reading}
     >
-      <svg
-        viewBox="0 0 400 250"
-        preserveAspectRatio="none"
-        className="absolute inset-0 h-full w-full opacity-30"
-        aria-hidden
-      >
-        <circle cx="336" cy="46" r="130" fill="#6ADD9B" opacity=".3" />
-        <circle cx="336" cy="46" r="82" fill="#0D2E33" opacity=".32" />
-      </svg>
+      {watermark && (
+        /* The isotipo, embossed, bleeding off the right edge.
+           `<MonokoroMark>` cannot do this: it emits hard width/height
+           attributes, so it can neither be sized in percentages nor cross an
+           edge — hence the inlined path.
 
-      {/* Specular sweep. Clipped by the rounded parent. */}
-      <div
-        className="absolute left-0 top-0 h-full w-[32%] bg-[linear-gradient(90deg,transparent,rgba(255,255,255,.3),transparent)]"
-        style={{ animation: "sheen 6.5s ease-in-out 1.8s infinite" }}
-        aria-hidden
-      />
+           A plate plus two offset **strokes**, not two offset fills. The first
+           attempt was two translucent copies of the shape, one dark and one
+           light, on the theory that the light one would cover the dark one
+           except for a sliver. Translucent fills do not cover anything: 7.5%
+           white over 24% black is still 24% black, so it rendered as one dark
+           blob. A stroke only paints the outline, so the light and dark slivers
+           are real and the interior stays a faint plate. Light from the top
+           left, shadow to the bottom right — raised, not engraved.
+
+           The offsets are in viewBox units, so the emboss scales with the mark
+           the way a real one would. */
+        <svg
+          viewBox="0 0 478 390"
+          preserveAspectRatio="xMidYMid meet"
+          className="pointer-events-none absolute top-[17%] right-[3%] z-0 h-[68%] w-auto"
+          aria-hidden
+        >
+          <path
+            transform="translate(239,195) rotate(45)"
+            fill="rgba(255,255,255,0.05)"
+            fillRule="evenodd"
+            d={MONOKORO_SOLID_D}
+          />
+          <path
+            transform="translate(241,197) rotate(45)"
+            fill="none"
+            stroke="rgba(0,0,0,0.11)"
+            strokeWidth="2.5"
+            fillRule="evenodd"
+            d={MONOKORO_SOLID_D}
+          />
+          <path
+            transform="translate(237,193) rotate(45)"
+            fill="none"
+            stroke="rgba(255,255,255,0.15)"
+            strokeWidth="2.5"
+            fillRule="evenodd"
+            d={MONOKORO_SOLID_D}
+          />
+        </svg>
+      )}
+
+      {/* The specular highlight. Static until a pointer writes --mk-mx/--mk-my
+          and --mk-lit on the parent — see components/motion/. */}
+      <div className="card-lit" aria-hidden />
 
       <div
         className={cx(
-          "relative flex min-h-full flex-col justify-between gap-2.5",
+          "relative z-[4] flex min-h-full flex-col justify-between gap-2.5",
           lg ? "p-[clamp(16px,3.2vw,32px)]" : "p-[clamp(14px,2.8vw,24px)]",
         )}
       >
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-2.5">
-            <MonokoroMark
-              size={lg ? 26 : 20}
-              variant="solid"
-              color="#FFFFFF"
-            />
+            <MonokoroMark size={lg ? 26 : 20} variant="solid" color="#FFFFFF" />
             <span
               className={cx(
                 "font-semibold tracking-[-0.015em] text-[var(--color-onDark)]",
@@ -112,6 +160,10 @@ export function CardFace({
             {label}
           </span>
         </div>
+
+        {/* Width in percent rather than px so the chip keeps its proportion on
+            the 200px fanned pair and on the 440px hero card alike. */}
+        <div className="card-chip w-[9.5%] aspect-[1.36]" aria-hidden />
 
         <div className={cx("flex flex-col", lg ? "gap-[18px]" : "gap-2")}>
           <div

@@ -50,7 +50,6 @@ export function Hero() {
 
           <div
             className="hero-in flex min-w-0 flex-[1_1_330px] flex-col gap-6 pb-2.5"
-            style={{ animationDelay: ".14s" }}
           >
             <p className="text-[20px] leading-[1.5] text-[var(--color-muted)] text-pretty">
               Cotizas, confirmas la tasa y recibes en minutos. Después los gastas
@@ -79,11 +78,10 @@ export function Hero() {
         {/* ── The dark panel: pitch on the left, live-looking chat on the right ── */}
         <div
           className="hero-in mk-glow panel mt-[clamp(28px,5vw,54px)]"
-          style={{ animationDelay: ".26s" }}
         >
           <div className="mk-aur-a" aria-hidden />
           <div className="mk-aur-b" aria-hidden />
-          <div className="mk-grid" aria-hidden />
+          <div className="mk-grid" data-parallax="0.04" aria-hidden />
           <div className="mk-spot" aria-hidden />
 
           <div className="relative flex flex-wrap gap-[clamp(26px,4vw,48px)] p-[clamp(24px,4vw,48px)]">

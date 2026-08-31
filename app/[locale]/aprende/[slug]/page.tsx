@@ -106,11 +106,16 @@ export default async function ArticlePage({
         ]}
       />
 
-      {/* Reading progress. `SiteEffects` finds it by id and widens it on
-          scroll; pages without it are simply skipped. */}
+      {/* Reading progress. `progress()` in components/motion/effects.ts finds
+          it by id; pages without it are simply skipped.
+
+          The only element on the site whose from-state is not set by JS, and
+          that is correct: a progress bar with nothing tracking the scroll
+          should be absent. It is chrome, not content. */}
       <div
         id="mk-prog"
-        className="fixed left-0 top-0 z-[90] h-0.5 w-0 bg-[linear-gradient(90deg,#6ADD9B,#2C7A80)]"
+        className="fixed left-0 top-0 z-[90] h-0.5 w-full bg-[linear-gradient(90deg,#6ADD9B,#2C7A80)]"
+        style={{ transform: "scaleX(0)", transformOrigin: "left center" }}
         aria-hidden
       />
 
@@ -151,7 +156,6 @@ export default async function ArticlePage({
           </h1>
           <p
             className="hero-in mt-[26px] max-w-[660px] text-[clamp(19px,2.3vw,23px)] leading-[1.5] text-[var(--color-muted)] text-pretty"
-            style={{ animationDelay: ".12s" }}
           >
             {post.lede}
           </p>

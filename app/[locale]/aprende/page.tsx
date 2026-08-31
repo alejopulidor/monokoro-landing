@@ -103,7 +103,6 @@ export default async function BlogIndex({
               </h1>
               <p
                 className="hero-in mb-2.5 min-w-0 flex-[1_1_320px] text-[20px] leading-[1.5] text-[var(--color-muted)] text-pretty"
-                style={{ animationDelay: ".12s" }}
               >
                 Guías cortas para entender qué estás comprando, cuánto cuesta de
                 verdad y cómo usarlo. Sin jerga y sin promesas raras.

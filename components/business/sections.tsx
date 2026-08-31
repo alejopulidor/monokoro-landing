@@ -172,12 +172,13 @@ export function BizRates() {
           className="mt-[clamp(30px,4vw,46px)] grid gap-5"
           style={{ gridTemplateColumns: "repeat(auto-fit,minmax(220px,1fr))" }}
         >
-          <RateCard label="FONDEAS A" value={`$ ${fmtCOP(RATE_BUY)}`} />
-          <RateCard label="VENDES A" value={`$ ${fmtCOP(RATE_SELL)}`} />
+          <RateCard label="FONDEAS A" value={`$ ${fmtCOP(RATE_BUY)}`} count={RATE_BUY} />
+          <RateCard label="VENDES A" value={`$ ${fmtCOP(RATE_SELL)}`} count={RATE_SELL} />
           <RateCard
             tone="dark"
             label="GASTO CON TARJETA"
             value={`$ ${fmtCOP(RATE_CARD)}`}
+            count={RATE_CARD}
           />
         </div>
 
@@ -216,8 +217,18 @@ export function BizBrand() {
               <div className="w-[min(320px,80vw)]">
                 {/* A blank card standing in for the customer's own artwork.
                     Deliberately not a real brand: putting someone else's logo
-                    on a mock implies a client relationship that does not exist. */}
-                <CardFace compact label="TU LOGO AQUÍ" last4="0000" />
+                    on a mock implies a client relationship that does not exist.
+                    `watermark={false}` for the same reason — the section's whole
+                    claim is that this face is the client's, so Monokoro's
+                    isotipo embossed across it would contradict the copy. The
+                    "POWERED BY MONOKORO" line below is where the attribution
+                    belongs. */}
+                <CardFace
+                  compact
+                  watermark={false}
+                  label="TU LOGO AQUÍ"
+                  last4="0000"
+                />
                 <div className="ff-m mt-4 text-center text-[10px] tracking-[0.14em] text-[rgba(239,246,240,0.55)]">
                   POWERED BY MONOKORO
                 </div>

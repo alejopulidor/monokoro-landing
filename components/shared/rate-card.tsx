@@ -13,12 +13,19 @@ import { cx } from "@/lib/cx";
 export function RateCard({
   label,
   value,
+  count,
+  countFormat = "cop",
   unit = "pesos por dólar",
   tone = "light",
   glow = false,
 }: {
   label: string;
   value: string;
+  /** The raw number behind `value`. Given it, the figure counts up on entry.
+   *  `value` still ships in the HTML, formatted — a crawler and a visitor
+   *  without JavaScript see the real rate, never `0`. */
+  count?: number;
+  countFormat?: "cop" | "usd";
   unit?: string;
   tone?: "light" | "dark";
   /** Adds the cursor spotlight. Only worth it on a card big enough to notice. */
@@ -50,7 +57,11 @@ export function RateCard({
       >
         {label}
       </div>
-      <div className="tnum relative text-[clamp(38px,5vw,58px)] font-semibold leading-none tracking-[-0.04em]">
+      <div
+        className="tnum relative text-[clamp(38px,5vw,58px)] font-semibold leading-none tracking-[-0.04em]"
+        data-count={count}
+        data-count-format={count === undefined ? undefined : countFormat}
+      >
         {value}
       </div>
       <div

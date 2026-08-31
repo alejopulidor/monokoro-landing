@@ -56,7 +56,6 @@ export function ProductHero({
 
           <div
             className="hero-in flex min-w-0 flex-[1_1_320px] flex-col gap-[26px] pb-2.5"
-            style={{ animationDelay: ".14s" }}
           >
             <p className="text-[20px] leading-[1.5] text-[var(--color-muted)] text-pretty">
               {lede}
@@ -84,10 +83,9 @@ export function ProductHero({
 
         <div
           className="hero-in mk-glow panel mt-[clamp(30px,5vw,54px)]"
-          style={{ animationDelay: ".26s" }}
         >
           <div className="mk-aur-a" aria-hidden />
-          <div className="mk-grid" aria-hidden />
+          <div className="mk-grid" data-parallax="0.04" aria-hidden />
           <div className="mk-spot" aria-hidden />
 
           {/* `perspective` belongs on this wrapper, not on the card itself: a 3D

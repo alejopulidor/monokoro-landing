@@ -25,8 +25,14 @@ const BODY_D =
 const COUNTER_D =
   "M -91.9 -92.6 L -91.9 -157.8 A 60 60 0 0 1 -31.9 -217.8 L 95.2 -217.8 A 60 60 0 0 1 155.2 -157.8 L 155.2 -152.6 A 60 60 0 0 1 95.2 -92.6 Z";
 
-/** The single-path version. `evenodd` is what carves the counter out. */
-const SOLID_D =
+/**
+ * The single-path version. `evenodd` is what carves the counter out.
+ *
+ * Exported because the card face inlines it at its own scale: `MonokoroMark`
+ * emits hard `width`/`height` attributes and cannot bleed off an edge, which
+ * is exactly what the embossed watermark has to do.
+ */
+export const MONOKORO_SOLID_D =
   "M -216.7 -33.3 A 60 60 0 0 1 -156.7 -93.3 L -91.9 -93.3 L -91.9 -157.8 A 60 60 0 0 1 -31.9 -217.8 L 95.2 -217.8 A 60 60 0 0 1 155.2 -157.8 L 155.2 95.2 A 60 60 0 0 1 95.2 155.2 L -156.7 155.2 A 60 60 0 0 1 -216.7 95.2 Z M -76.4 -92 L -76.4 -157.8 A 44.5 44.5 0 0 1 -31.9 -202.3 L 95.2 -202.3 A 44.5 44.5 0 0 1 139.7 -157.8 L 139.7 -143 A 51 51 0 0 1 88.7 -92 Z";
 
 export function MonokoroMark({
@@ -64,7 +70,7 @@ export function MonokoroMark({
           transform="translate(239,195) rotate(45)"
           fill={color}
           fillRule="evenodd"
-          d={SOLID_D}
+          d={MONOKORO_SOLID_D}
         />
       </svg>
     );

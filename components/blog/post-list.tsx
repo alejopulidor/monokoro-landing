@@ -14,11 +14,10 @@ export function FeaturedPost({ post }: { post: Post }) {
     <Link
       href={postHref(post.slug)}
       className="hero-in panel mk-lift block"
-      style={{ animationDelay: ".2s" }}
     >
       <div className="mk-aur-a" aria-hidden />
       <div className="mk-aur-b" aria-hidden />
-      <div className="mk-grid" aria-hidden />
+      <div className="mk-grid" data-parallax="0.04" aria-hidden />
 
       <div className="relative flex flex-wrap items-end gap-x-11 gap-y-[26px] p-[clamp(30px,5vw,64px)]">
         <div className="min-w-0 flex-[1_1_420px]">

@@ -24,9 +24,9 @@ const SPECS = [
 export function CardSection() {
   return (
     <section className="sec-lg gutter">
-      <div className="mk-glow panel shell">
+      <div className="mk-glow panel shell" data-panel>
         <div className="mk-aur-b" aria-hidden />
-        <div className="mk-grid" aria-hidden />
+        <div className="mk-grid" data-parallax="0.04" aria-hidden />
         <div className="mk-spot" aria-hidden />
 
         <div className="relative flex flex-wrap gap-[clamp(32px,4vw,52px)] px-[clamp(24px,4vw,56px)] py-[clamp(30px,4.4vw,60px)]">
@@ -61,14 +61,17 @@ export function CardSection() {
             className="flex min-w-0 flex-[1_1_320px] items-center justify-center"
             style={{ perspective: "1500px" }}
           >
+            {/* No `floatY` here, deliberately. `cardTilt()` rotates this
+                element with the scroll, and a looping translate on the child at
+                the same time is exactly the double authorship that reads as
+                cheap. The card page's hero keeps its float, because nothing
+                else on that card is moving. */}
             <div id="mk-card" className="w-full max-w-[420px]">
-              <div style={{ animation: "floatY 8s ease-in-out infinite" }}>
-                <CardFace
-                  label="USD"
-                  holder="MARIANA TORRES"
-                  balance="614,25 USD"
-                />
-              </div>
+              <CardFace
+                label="USD"
+                holder="MARIANA TORRES"
+                balance="614,25 USD"
+              />
             </div>
           </div>
         </div>
