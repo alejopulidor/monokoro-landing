@@ -19,15 +19,33 @@ import { cx } from "@/lib/cx";
  * written as `max-[900px]:` / `min-[900px]:` so the number stays visible here
  * instead of hiding behind an alias.
  *
- * Which links appear is decided by `lib/nav.ts`, not here: Tarjeta and
- * Negocios are in the design but their pages do not exist yet, so they carry
- * `ready: false` and are filtered out.
+ * Which links appear is decided by `lib/nav.ts`, not here — including whether
+ * a destination exists yet at all.
+ *
+ * The product pages pass their own `links`: a product page's bar is a table of
+ * contents for that page, while the site map lives in the footer. They also
+ * pass a `subtitle` ("Tarjeta") and their own CTA, because "Comprar" is the
+ * wrong ask on a page about issuing a card.
  */
-export function Nav({ activeHref }: { activeHref?: string }) {
+export function Nav({
+  activeHref,
+  subtitle,
+  links: linksProp,
+  mobileLinks: mobileLinksProp,
+  cta,
+}: {
+  activeHref?: string;
+  /** Rendered after the wordmark in a lighter weight: "Monokoro Tarjeta". */
+  subtitle?: string;
+  links?: NavItem[];
+  mobileLinks?: NavItem[];
+  cta?: { label: string; message: string };
+}) {
   const [open, setOpen] = useState(false);
-  const links = ready(PRIMARY_NAV);
-  const mobileLinks = ready(MOBILE_NAV);
-  const buy = waLink("Hola, quiero comprar dólares digitales");
+  const links = ready(linksProp ?? PRIMARY_NAV);
+  const mobileLinks = ready(mobileLinksProp ?? linksProp ?? MOBILE_NAV);
+  const ctaLabel = cta?.label ?? "Comprar";
+  const buy = waLink(cta?.message ?? "Hola, quiero comprar dólares digitales");
 
   // Lock the page behind the sheet, and put it back on unmount — otherwise a
   // route change while the sheet is open leaves the body unscrollable.
@@ -53,7 +71,14 @@ export function Nav({ activeHref }: { activeHref?: string }) {
       >
         <div className="shell gutter flex items-center justify-between gap-x-7 gap-y-3.5 py-3">
           <Link href="/" aria-label="Monokoro — inicio">
-            <Wordmark />
+            <span className="inline-flex items-baseline gap-2">
+              <Wordmark />
+              {subtitle && (
+                <span className="text-[19px] font-normal tracking-[-0.02em] text-[var(--color-teal)]">
+                  {subtitle}
+                </span>
+              )}
+            </span>
           </Link>
 
           <div className="flex items-center gap-[26px] text-[15px] text-[var(--color-muted)] max-[900px]:hidden">
@@ -67,7 +92,7 @@ export function Nav({ activeHref }: { activeHref?: string }) {
               className="mk-mag btn btn-ink btn-sm shadow-[0_10px_24px_-14px_rgba(13,46,51,.9)]"
               href={buy}
             >
-              Comprar <Arrow />
+              {ctaLabel} <Arrow />
             </a>
             <button
               type="button"
@@ -96,6 +121,11 @@ export function Nav({ activeHref }: { activeHref?: string }) {
             <span className="inline-flex items-center gap-[11px] text-[19px] font-semibold tracking-[-0.02em] text-[var(--color-onDark)]">
               <MonokoroMark size={28} />
               Monokoro
+              {subtitle && (
+                <span className="font-normal text-[var(--color-mint)]">
+                  {subtitle}
+                </span>
+              )}
             </span>
             <button
               type="button"
@@ -122,7 +152,7 @@ export function Nav({ activeHref }: { activeHref?: string }) {
             className="btn mk-mag mt-auto bg-[var(--color-mint)] px-6 py-[17px] text-[17px] font-semibold text-[var(--color-ink)]"
             href={buy}
           >
-            Comprar por WhatsApp <Arrow />
+            {ctaLabel} por WhatsApp <Arrow />
           </a>
         </div>
       )}
@@ -131,9 +161,15 @@ export function Nav({ activeHref }: { activeHref?: string }) {
 }
 
 /**
- * Every entry goes through next-intl's `Link`, including the `/#cotiza` form:
- * it resolves to `/es/#cotiza`, so the anchor keeps working from the blog as
+ * Two kinds of destination, and they must not be routed the same way.
+ *
+ * `/#cotiza` means "the home page, at that anchor" and goes through next-intl's
+ * `Link`, which resolves it to `/es/#cotiza` — so it works from the blog as
  * well as from the home page, where the browser just scrolls.
+ *
+ * A bare `#que-es` is an anchor on the **current** page, which every product
+ * page's bar is full of. That one has to stay a plain `<a>`: handing a bare
+ * hash to the locale router asks it to build a route out of a fragment.
  */
 function NavLink({
   item,
@@ -150,6 +186,14 @@ function NavLink({
     className ?? "transition-colors hover:text-[var(--color-ink)]",
     active && !className && "text-[var(--color-ink)]",
   );
+
+  if (item.href.startsWith("#")) {
+    return (
+      <a href={item.href} className={cls} onClick={onNavigate}>
+        {item.label}
+      </a>
+    );
+  }
 
   return (
     <Link href={item.href} className={cls} onClick={onNavigate}>

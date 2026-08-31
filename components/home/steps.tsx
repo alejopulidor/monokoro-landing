@@ -1,4 +1,4 @@
-import { SectionHead } from "./section-head";
+import { SectionHead } from "@/components/shared/section-head";
 
 const STEPS = [
   {

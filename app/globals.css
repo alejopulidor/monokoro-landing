@@ -191,6 +191,31 @@
     100% { transform: translateY(400%); }
   }
 
+  /* The card page's hero: the card falls in, overshoots, and settles. The
+     62% keyframe is the overshoot — without it the drop reads as a slide. */
+  @keyframes heroDrop {
+    0%   { opacity: 0; transform: translateY(-260px) rotateX(52deg) rotateZ(-18deg) scale(0.72); }
+    62%  { opacity: 1; transform: translateY(14px) rotateX(-6deg) rotateZ(2deg) scale(1.02); }
+    100% { opacity: 1; transform: translateY(0) rotateX(0) rotateZ(0) scale(1); }
+  }
+  /* Its ground shadow, timed to the same curve so the card looks like it lands
+     on something rather than in front of it. */
+  @keyframes shadowIn {
+    0%   { opacity: 0; transform: scale(0.5); }
+    62%  { opacity: 0.55; transform: scale(1.06); }
+    100% { opacity: 0.4; transform: scale(1); }
+  }
+  @keyframes stackDrop {
+    from { opacity: 0; transform: translateY(-90px) rotateZ(-10deg) scale(0.86); }
+    to   { opacity: 1; transform: translateY(0) rotateZ(0) scale(1); }
+  }
+  /* Same idea as stackDrop but played on mount, for the fanned pair in the
+     business hero — which is above the fold and has nothing to wait for. */
+  @keyframes fanDrop {
+    from { opacity: 0; transform: translateY(-110px) rotateZ(-14deg) scale(0.84); }
+    to   { opacity: 1; transform: translateY(0) rotateZ(0) scale(1); }
+  }
+
   /* Mount-time entrance for above-the-fold content. Stagger with an inline
      `animation-delay`; there is no scroll trigger here because the hero is
      already in view. */
@@ -267,6 +292,18 @@
     padding-left: 14px;
     background: rgba(255, 255, 255, 0.5);
   }
+
+  /**
+   * The two fanned cards in "individual vs empresarial". Scroll-triggered like
+   * `.rv`, but an *animation* rather than a transition, because each card also
+   * carries its own resting `rotate()` — a transition on `transform` would
+   * fight that inline rotation instead of composing with it.
+   *
+   * `SiteEffects` adds `.in`; the reduced-motion block at the end of this file
+   * cancels the start state.
+   */
+  .mk-stack { opacity: 0; }
+  .mk-stack.in { animation: stackDrop 0.95s cubic-bezier(0.2, 0.85, 0.25, 1) both; }
 
   .mk-lift {
     transition: transform 0.32s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.32s;
@@ -509,6 +546,17 @@
   #mk-line {
     transform: scaleX(1);
     transition: none;
+  }
+  .mk-stack,
+  .mk-stack.in {
+    opacity: 1;
+    animation: none;
+  }
+  .card-drop,
+  .card-drop-shadow {
+    opacity: 1;
+    animation: none;
+    transform: none;
   }
   .mk-aur-a,
   .mk-aur-b {

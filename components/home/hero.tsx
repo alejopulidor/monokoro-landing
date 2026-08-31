@@ -1,5 +1,5 @@
 import { Arrow, MonokoroMark } from "@/components/site/brand";
-import { SpecList } from "./spec-list";
+import { SpecList } from "@/components/shared/spec-list";
 import { WhatsappDemo } from "./whatsapp-demo";
 import { fmtCOP } from "@/lib/format";
 import { MIN_AMOUNT_COP, RATE_BUY, waLink } from "@/lib/config";

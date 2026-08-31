@@ -16,9 +16,11 @@ import { CardSection } from "@/components/home/card-section";
 import { Tiers } from "@/components/home/tiers";
 import { Uses } from "@/components/home/uses";
 import { Transparency } from "@/components/home/transparency";
-import { Learn } from "@/components/home/learn";
-import { Faq } from "@/components/home/faq";
-import { Closing } from "@/components/home/closing";
+import { Learn } from "@/components/shared/learn";
+import { Faq } from "@/components/shared/faq";
+import { Closing } from "@/components/shared/closing";
+import { fmtCOP } from "@/lib/format";
+import { MIN_AMOUNT_COP } from "@/lib/config";
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
@@ -61,9 +63,21 @@ export default async function HomePage({
         <Tiers />
         <Uses />
         <Transparency />
-        <Learn locale={typed} />
-        <Faq />
-        <Closing />
+        <Learn locale={typed} title="Entiende antes de mover tu plata." />
+        <Faq
+          items={FAQ_ITEMS}
+          title="Lo que preguntan antes de comprar."
+          lede="¿Tienes otra pregunta? Escríbenos y el agente te responde en minutos."
+          waMessage="Hola, tengo una pregunta sobre Monokoro"
+        />
+        <Closing
+          mark
+          eyebrow={`DESDE $ ${fmtCOP(MIN_AMOUNT_COP)} COP · VERIFICACIÓN UNA SOLA VEZ`}
+          title="Tu primer dólar está a un mensaje."
+          lede="Cotizas, confirmas la tasa y recibes. Todo en el chat que ya tienes abierto."
+          ctaLabel="Comprar dólares por WhatsApp"
+          waMessage="Hola, quiero comprar dólares digitales"
+        />
       </main>
       <Footer locale={typed} />
       <MobileCta />

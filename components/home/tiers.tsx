@@ -1,5 +1,5 @@
 import { Arrow } from "@/components/site/brand";
-import { SectionHead } from "./section-head";
+import { SectionHead } from "@/components/shared/section-head";
 import { fmtCOP, fmtUSD } from "@/lib/format";
 import { RATE_BUY, waLink } from "@/lib/config";
 import { cx } from "@/lib/cx";

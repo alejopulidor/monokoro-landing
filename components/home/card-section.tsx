@@ -1,5 +1,6 @@
-import { Arrow, MonokoroMark } from "@/components/site/brand";
-import { SpecList } from "./spec-list";
+import { Arrow } from "@/components/site/brand";
+import { CardFace } from "@/components/shared/card-face";
+import { SpecList } from "@/components/shared/spec-list";
 import { isReady } from "@/lib/nav";
 import { waLink } from "@/lib/config";
 
@@ -82,90 +83,16 @@ export function CardSection() {
           >
             <div id="mk-card" className="w-full max-w-[420px]">
               <div style={{ animation: "floatY 8s ease-in-out infinite" }}>
-                <CardFace />
+                <CardFace
+                  label="USD"
+                  holder="MARIANA TORRES"
+                  balance="614,25 USD"
+                />
               </div>
             </div>
           </div>
         </div>
       </div>
     </section>
-  );
-}
-
-/**
- * The card itself. Drawn in the DOM rather than shipped as an image: it stays
- * crisp at any size, costs no request, and the holder/balance are real text.
- *
- * The aspect ratio is 1.585 — the ISO/IEC 7810 ID-1 ratio a real card has, so
- * it reads as a card and not as a rounded rectangle. The number is masked; the
- * visible digits are not a usable range.
- */
-function CardFace() {
-  return (
-    <div
-      className="relative overflow-hidden rounded-[22px] border border-[rgba(106,221,155,0.28)] shadow-[0_44px_84px_rgba(3,20,24,.6)]"
-      style={{
-        aspectRatio: "1.585",
-        background:
-          "linear-gradient(140deg,#0D2E33 0%,#2C7A80 62%,#4FB89E 100%)",
-      }}
-      role="img"
-      aria-label="Tarjeta Monokoro en dólares, con saldo de ejemplo"
-    >
-      <svg
-        viewBox="0 0 400 250"
-        preserveAspectRatio="none"
-        className="absolute inset-0 h-full w-full opacity-30"
-        aria-hidden
-      >
-        <circle cx="330" cy="52" r="120" fill="#6ADD9B" opacity=".3" />
-        <circle cx="330" cy="52" r="76" fill="#0D2E33" opacity=".3" />
-      </svg>
-
-      {/* Specular sweep. Clipped by the rounded parent. */}
-      <div
-        className="absolute left-0 top-0 h-full w-[34%] bg-[linear-gradient(90deg,transparent,rgba(255,255,255,.28),transparent)]"
-        style={{ animation: "sheen 7s ease-in-out 1.2s infinite" }}
-        aria-hidden
-      />
-
-      <div className="relative flex min-h-full flex-col justify-between gap-2.5 p-[clamp(14px,3vw,28px)]">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-[9px]">
-            <MonokoroMark size={22} variant="solid" color="#FFFFFF" />
-            <span className="text-base font-semibold tracking-[-0.015em] text-[var(--color-onDark)]">
-              Monokoro
-            </span>
-          </div>
-          <span className="ff-m text-[11.5px] tracking-[0.16em] text-[var(--color-mint)]">
-            USD
-          </span>
-        </div>
-
-        <div className="flex flex-col gap-[clamp(8px,2.2vw,16px)]">
-          <div className="ff-m tnum text-[clamp(13px,2.2vw,19px)] tracking-[0.12em] text-[var(--color-onDark)]">
-            •••• •••• •••• 4821
-          </div>
-          <div className="flex items-end justify-between gap-4">
-            <div>
-              <div className="ff-m text-[9.5px] tracking-[0.14em] text-[rgba(239,246,240,0.55)]">
-                TITULAR
-              </div>
-              <div className="mt-[3px] text-sm text-[var(--color-onDark)]">
-                MARIANA TORRES
-              </div>
-            </div>
-            <div className="text-right">
-              <div className="ff-m text-[9.5px] tracking-[0.14em] text-[rgba(239,246,240,0.55)]">
-                SALDO
-              </div>
-              <div className="tnum mt-[3px] text-sm text-[var(--color-mint)]">
-                614,25 USD
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
   );
 }

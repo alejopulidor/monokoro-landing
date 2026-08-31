@@ -50,6 +50,8 @@ Qué es y qué no es, sin ambigüedad:
 ## Páginas
 
 - [Inicio](${base}/): qué es Monokoro, cotizador de compra/venta/recarga, cómo funciona en tres pasos, la tarjeta, preguntas frecuentes.
+- [Tarjeta](${base}/tarjeta/): la tarjeta denominada en dólares. Se crea desde el chat, paga en dólares lo que se cobra en dólares y en pesos lo local, y su saldo sale de los dólares digitales del cliente.
+- [Negocios](${base}/negocios/): tarjetas empresariales en dólares para pauta, proveedores y viáticos. Ilimitadas, cobrandeadas si se quiere, con API y webhooks.
 - [Aprende](${base}/aprende/): guías cortas sobre dólares digitales, ahorro y pagos internacionales desde Colombia.
 
 ## Guías

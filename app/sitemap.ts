@@ -19,10 +19,15 @@ export const dynamic = "force-static";
  * Articles are appended per locale from `content/posts.ts`, so publishing one
  * puts it in the sitemap with no second edit to remember.
  */
-const STATIC_PATHS = ["", "aprende", "terms", "privacy"] as const;
+const STATIC_PATHS = ["", "tarjeta", "negocios", "aprende", "terms", "privacy"] as const;
 
 /** The home is the entry point; everything else is supporting material. */
-const PRIORITY: Record<string, number> = { "": 1, aprende: 0.8 };
+const PRIORITY: Record<string, number> = {
+  "": 1,
+  tarjeta: 0.9,
+  negocios: 0.9,
+  aprende: 0.8,
+};
 
 export default function sitemap(): MetadataRoute.Sitemap {
   return routing.locales.flatMap((locale) => {

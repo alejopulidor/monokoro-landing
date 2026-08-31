@@ -4,15 +4,47 @@
     "kicker": "DÓLARES DIGITALES · COLOMBIA",
     "title": "Ahorra en <em>dólares</em>.<br>Desde WhatsApp.",
     "sub": "Cotizas, confirmas la tasa y recibes en minutos. Después los gastas con tu tarjeta, en dólares.",
-    "chips": ["Una sola tasa", "Sin apps nuevas", "Soporte humano"],
+    "chips": [
+      "Una sola tasa",
+      "Sin apps nuevas",
+      "Soporte humano"
+    ],
     "trust": "MONOKORO.CO"
+  },
+  {
+    "id": "tarjeta",
+    "kicker": "TARJETA MONOKORO",
+    "title": "Ahorras en <em>dólares</em>.<br>Pagas donde sea.",
+    "sub": "Una tarjeta respaldada en dólares digitales. Se crea en minutos desde el chat.",
+    "chips": [
+      "Dólares y pesos",
+      "Sin cuenta en el exterior",
+      "Una sola tasa"
+    ],
+    "trust": "MONOKORO.CO/TARJETA"
+  },
+  {
+    "id": "negocios",
+    "kicker": "MONOKORO NEGOCIOS",
+    "title": "La tarjeta que <em>no te tumba la pauta</em>.",
+    "sub": "Tarjetas en dólares, ilimitadas, creadas desde WhatsApp. Una por campaña, por cliente o por proveedor.",
+    "chips": [
+      "Tarjetas ilimitadas",
+      "Con tu marca",
+      "API disponible"
+    ],
+    "trust": "MONOKORO.CO/NEGOCIOS",
+    "long": true
   },
   {
     "id": "aprende",
     "kicker": "APRENDE",
     "title": "Dólares digitales,<br><em>explicados sin vueltas</em>.",
     "sub": "Guías cortas para entender qué estás comprando, cuánto cuesta de verdad y cómo usarlo.",
-    "chips": ["Sin jerga", "Sin promesas raras"],
+    "chips": [
+      "Sin jerga",
+      "Sin promesas raras"
+    ],
     "trust": "MONOKORO.CO/APRENDE"
   },
   {
@@ -20,7 +52,11 @@
     "kicker": "GUÍA · 3 MIN DE LECTURA",
     "title": "¿Qué es un <em>dólar digital</em> y por qué existe?",
     "sub": "Qué son, quién los respalda y en qué se diferencian de una criptomoneda volátil.",
-    "chips": ["Respaldo", "Riesgos", "Cómo se compra"],
+    "chips": [
+      "Respaldo",
+      "Riesgos",
+      "Cómo se compra"
+    ],
     "trust": "MONOKORO.CO/APRENDE",
     "long": true
   },
@@ -29,7 +65,11 @@
     "kicker": "AHORRO · 2 MIN DE LECTURA",
     "title": "Ahorrar en dólares en Colombia: <em>tres formas y sus costos</em>",
     "sub": "Cuenta en el exterior, casa de cambio y dólar digital. Qué cuesta entrar y qué cuesta salir.",
-    "chips": ["Costo de entrada", "Costo de salida", "Monto mínimo"],
+    "chips": [
+      "Costo de entrada",
+      "Costo de salida",
+      "Monto mínimo"
+    ],
     "trust": "MONOKORO.CO/APRENDE",
     "long": true
   },
@@ -38,7 +78,10 @@
     "kicker": "PAGOS · 2 MIN DE LECTURA",
     "title": "Por qué tu tarjeta <em>rebota</em> en pagos internacionales",
     "sub": "Conversión doble, cupo cerrado y bloqueos por riesgo. Cómo evitar el rechazo.",
-    "chips": ["4 causas comunes", "Cómo se evita"],
+    "chips": [
+      "4 causas comunes",
+      "Cómo se evita"
+    ],
     "trust": "MONOKORO.CO/APRENDE",
     "long": true
   }

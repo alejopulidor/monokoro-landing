@@ -36,9 +36,10 @@ cuando cambia el codigo. Se ejecuta a mano y se commitea el JPEG.
 
 | Ruta | Qué es |
 | --- | --- |
-| `app/[locale]/` | Home, blog (`/aprende`) y páginas legales |
+| `app/[locale]/` | Home, `/tarjeta`, `/negocios`, blog (`/aprende`) y legales |
 | `components/site/` | Chrome compartido: nav, footers, marca, efectos |
-| `components/home/` | Las secciones de la landing, una por archivo |
+| `components/shared/` | Las piezas que las tres páginas comparten |
+| `components/home/`, `card/`, `business/` | Secciones propias de cada página |
 | `components/blog/` | Índice y cuerpo de artículos |
 | `content/` | Copy estructurado: artículos del blog y FAQ |
 | `lib/config.ts` | Tasas, número de WhatsApp, URLs — **única fuente de verdad** |
@@ -61,6 +62,5 @@ explícitamente) y `/llms.txt`.
 
 ## Estado
 
-Implementado: la landing principal (`Monokoro v5`), el blog y sus tres
-artículos. Pendientes: las páginas de Tarjeta y Negocios — sus enlaces están
-apagados en `lib/nav.ts` hasta que existan.
+Todos los canvas del diseño están implementados: la landing principal, Tarjeta,
+Negocios, el blog con sus tres artículos y el 404.

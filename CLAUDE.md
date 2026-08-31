@@ -50,14 +50,43 @@ Implemented so far:
 | Canvas file | Route |
 | --- | --- |
 | `Monokoro v5.dc.html` | `/es/` |
+| `Monokoro Tarjeta v5.dc.html` | `/es/tarjeta/` |
+| `Monokoro Negocios v5.dc.html` | `/es/negocios/` |
 | `Monokoro Blog.dc.html` | `/es/aprende/` |
 | `Monokoro Dolar Digital.dc.html` | `/es/aprende/que-es-un-dolar-digital/` |
 | `Monokoro Blog Ahorrar.dc.html` | `/es/aprende/ahorrar-en-dolares-colombia/` |
 | `Monokoro Blog Suscripciones.dc.html` | `/es/aprende/tarjeta-rechazada-pagos-internacionales/` |
+| `Monokoro 404.dc.html` | `app/not-found.tsx` → `out/404.html` |
 
-**Not implemented yet, by instruction:** `Monokoro Tarjeta v5.dc.html` and `Monokoro Negocios v5.dc.html`. Their nav entries exist in `lib/nav.ts` with `ready: false`, and the in-page CTAs that would point at them fall back to WhatsApp. Building either page = create the route, flip its flag, done — the nav, the mobile sheet, the footer and `CardSection` all read that one list.
+Every canvas is implemented. The older ones (`Monokoro.dc.html`, `v2`, `v3`, `v4`, `Negocios.dc.html`, `Tarjeta.dc.html`) are superseded — **v5 is the reference**, don't port from them.
 
-The older canvases (`Monokoro.dc.html`, `v2`, `v3`, `v4`, `Negocios.dc.html`, `Tarjeta.dc.html`) are superseded. **v5 is the reference.** Don't port from the older ones.
+The 404's optional auto-redirect is deliberately not implemented: moving someone off a page they are still reading is hostile, and it was opt-in in the canvas too.
+
+## The shared component layer
+
+The three marketing pages are ~80% the same shapes with different copy, so `components/shared/` holds the shapes and the pages hold the argument. **Look here before writing a new section** — the odds are it already exists.
+
+| Component | What it is | Used by |
+| --- | --- | --- |
+| `section-head` | eyebrow + headline + baseline-aligned lede | all |
+| `ruled-list` | numbered rows, ruled — for points of equal weight | home, card, business |
+| `card-grid` | auto-fit grid of numbered cards — for capabilities | card, business |
+| `compare-table` | a real `<table>`; column A is the status quo, B is Monokoro | card, business |
+| `flow-list` | the dotted "recorrido de la plata" timeline | card, business |
+| `colored-steps` | three stacked ink/teal step cards | card, business |
+| `agent-chat` | the small looping WhatsApp mock | card, business |
+| `card-face` | the card itself, at three sizes | home, card, business, 404 |
+| `product-hero` | eyebrow/headline/CTAs + dark panel with a `visual` slot | card, business |
+| `rate-card`, `topup` | one headline rate; the recharge simulator | card, business |
+| `trust-panel` | dark spec panel + the infrastructure sentence | card, business |
+| `spec-list`, `faq`, `closing`, `learn` | mono key/values; accordion; CTA panel; article cards | all |
+
+Two rules that keep this from rotting:
+
+- **A shape goes here the second time it is needed, not the first.** `components/home/whatsapp-demo.tsx` is deliberately *not* merged into `agent-chat`: the home demo has a rate lock, a progress rail, quick-reply chips and a composer, and merging them would produce one component with a dozen booleans.
+- **Rhythm is decided by the component, data by the caller.** `colored-steps` alternates ink/teal by position rather than taking six colour strings per step, because that is a rhythm and passing it through the content layer invites someone to break it by accident.
+
+`components/{home,card,business}/` hold the page-specific compositions — a section that has its own layout or its own prose. The lists they render come from `content/`.
 
 ## i18n — Spanish only, on purpose
 
@@ -71,7 +100,8 @@ The older canvases (`Monokoro.dc.html`, `v2`, `v3`, `v4`, `Negocios.dc.html`, `T
 
 | Kind | Lives in | Why |
 | --- | --- | --- |
-| Section copy (hero, pasos, tarjeta, beneficios…) | **inline in the component** | One locale, and the copy is inseparable from the layout that balances it. Editing a headline and its line break in one place is worth more than the indirection. |
+| Section headings and prose | **inline in the page or its section component** | One locale, and a headline is inseparable from the layout that balances it. |
+| Section *lists* (steps, use cases, comparison rows, specs) | `content/{card,business}.ts` | They are rendered by shared components, so they have to arrive as data. |
 | Blog articles | `content/posts.ts` | The index and `generateStaticParams` need to *enumerate* posts; messages are keyed lookups, not a collection. |
 | FAQ | `content/faq.ts` | Two consumers must agree: the accordion and the `FAQPage` JSON-LD. |
 | Legal documents | `messages/es.json` | Structured JSON so counsel can rewrite a clause without touching JSX. |
@@ -82,10 +112,11 @@ The older canvases (`Monokoro.dc.html`, `v2`, `v3`, `v4`, `Negocios.dc.html`, `T
 ## What lives where
 
 - `app/[locale]/page.tsx` — home. The section order is an argument, not a menu: hero → cotizador → pasos → tarjeta → empieza → beneficios → transparencia → aprende → faq → cierre. Moving a section changes the argument.
+- `app/[locale]/{tarjeta,negocios}/page.tsx` — the two product pages. Each reads as a list of sections; the order is the argument, same as the home.
 - `app/[locale]/aprende/page.tsx` — blog index. `app/[locale]/aprende/[slug]/page.tsx` — one page per post, `dynamicParams = false`.
 - `app/[locale]/{terms,privacy}/page.tsx` — both rendered by `components/legal-page.tsx` from JSON sections.
 - `lib/config.ts` — **the single source of truth** for the WhatsApp number, the four reference rates, the site URL and the emails. Every CTA on the site is built with `waLink()` from here. **Update here, never in a component.**
-- `lib/nav.ts` — which destinations exist. See "Not implemented yet" above.
+- `lib/nav.ts` — every destination plus a `ready` flag, and the per-page nav lists. A product page's bar is a table of contents for that page; the site map lives in the footer.
 - `lib/format.ts` — `fmtCOP` / `fmtUSD`, hand-written. See "Things that look wrong but aren't".
 - `lib/schema.ts` + `components/seo/json-ld.tsx` — JSON-LD. Monokoro is declared **once**, in the locale layout under `ORG_ID`; everything else references it by `@id` instead of declaring a second organization. Crawlers merge every `ld+json` block on a page into one graph, which is what makes that work. `json-ld.tsx` exists only to centralize `.replace(/</g, "\\u003c")`, so no call site can forget it and let a `</script>` inside a string close the tag early.
 - `components/site/site-effects.tsx` — **all** page-wide motion, in one client component. See below.
@@ -215,7 +246,7 @@ pnpm og         # re-render the social cards — by hand, not part of the build
 npx serve out   # preview the static build
 ```
 
-The build emits 14 routes: `/`, `/_not-found`, `/es`, `/es/aprende`, three articles, `/es/terms`, `/es/privacy`, `/icon.svg`, `/llms.txt`, `/robots.txt`, `/sitemap.xml`.
+The build emits 17 routes: `/`, `/_not-found`, `/es`, `/es/aprende`, three articles, `/es/tarjeta`, `/es/negocios`, `/es/terms`, `/es/privacy`, `/icon.svg`, `/apple-icon.png`, `/llms.txt`, `/robots.txt`, `/sitemap.xml`.
 
 ### Screenshotting this site
 

@@ -106,6 +106,39 @@ export function faqSchema(items: readonly { q: string; a: string }[]) {
   };
 }
 
+/**
+ * A product page (`/tarjeta`, `/negocios`).
+ *
+ * Typed as `Service`, not `FinancialProduct` or `BankAccount`. Monokoro
+ * intermediates and the cards are issued through partners; asserting a
+ * regulated product type it does not hold a licence for is a compliance
+ * problem, not an SEO trick. See the note on `organizationSchema`.
+ */
+export function productSchema({
+  slug,
+  name,
+  description,
+  locale,
+}: {
+  slug: string;
+  name: string;
+  description: string;
+  locale: Locale;
+}) {
+  const url = `${SITE_URL}/${locale}/${slug}/`;
+  return {
+    "@context": "https://schema.org",
+    "@type": "Service",
+    "@id": `${url}#service`,
+    name,
+    description,
+    url,
+    provider: { "@id": ORG_ID },
+    areaServed: { "@type": "Country", name: "Colombia" },
+    inLanguage: locale,
+  };
+}
+
 export type Crumb = { label: string; href?: string };
 
 /** The last crumb is the current page: per spec it carries no `item`. */

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Arrow } from "@/components/site/brand";
-import { SectionHead } from "./section-head";
+import { SectionHead } from "@/components/shared/section-head";
 import { digitsOnly, fmtCOP, fmtUSD } from "@/lib/format";
 import { RATE_BUY, RATE_CARD, RATE_SELL, waLink } from "@/lib/config";
 import { cx } from "@/lib/cx";
