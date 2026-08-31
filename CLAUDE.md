@@ -241,7 +241,6 @@ because renaming 37 `.rv` call sites buys nothing: the load-bearing property is
 | `#mk-prog` | `progress` | scrubbed |
 | `.mk-mag` | `magnetic` — `gsap.quickTo` | pointer |
 | `.mk-glow` + `.mk-spot` | `spotlight` — writes `--mk-x` / `--mk-y` | pointer |
-| `.card-face` | `cardLight` — writes `--mk-mx` / `--mk-my` / `--mk-lit` | pointer |
 
 There is deliberately **no step effect** on `components/shared/colored-steps.tsx`,
 even though a per-index trigger offset is the right shape for three cards that
@@ -250,7 +249,15 @@ on one element's `y`. The reason is written out in `effects.ts` where the
 function would have gone.
 
 Two matchMedia branches, one `mm`: `MQ.motion` runs the scroll effects plus
-Lenis, `MQ.motion and MQ.hover` runs the three pointer ones. `MQ.hover` is a **capability**
+Lenis, `MQ.motion and MQ.hover` runs the two pointer ones.
+
+**The card's hover treatment is pure CSS and deliberately not in this table.**
+`.mk-ring` is a mint light travelling around the border, driven by animating a
+registered `<angle>` behind a masked conic gradient. It replaced `cardLight`,
+which wrote three custom properties on `.card-face` so a specular highlight
+followed the pointer. Doing it in CSS means no JavaScript, nothing to wire on a
+navigation, and nothing for a touch screen to get stuck on — prefer that shape
+for any hover effect that does not need to know where the pointer is. `MQ.hover` is a **capability**
 test, not a width test — the old `innerWidth > 760` check was wrong in both
 directions on a touch laptop.
 
@@ -442,10 +449,21 @@ the content is a normal child and two layers are pseudo-elements:
   earlier comment in this file claimed the card's text was reachable; it was not.
 - **`watermark={false}` on the co-branded card** in `components/business/sections.tsx`.
   That section's whole claim is that the face is the client's.
-- The three custom properties are **registered with `@property`**. An
-  unregistered custom property cannot be transitioned and cannot be used in
-  `calc()` inside `rgb()`; the registration is what lets `--mk-lit` fade instead
-  of snapping.
+- **Hover is `.mk-ring`, a mint light travelling around the border.** One conic
+  gradient rotated by animating `--mk-ring`, which is **registered with
+  `@property` as an `<angle>`** — an unregistered custom property is an
+  unanimatable token and `@keyframes` on one does nothing at all. Only the edge
+  band shows: two masks, one clipped to `content-box` and one to `border-box`,
+  composited with `exclude`, leaving the 2px padding ring. Gated on
+  `(hover: hover) and (pointer: fine)`.
+  It is a shared class — drop it on any card whose parent is `position:
+  relative` and has its own `border-radius`.
+- **The specular highlight no longer follows the pointer.** It did, through
+  `--mk-mx` / `--mk-my` / `--mk-lit` and a `cardLight` effect; the ring replaced
+  that, and the properties and the effect were deleted rather than left in place
+  with nothing driving them. What remains is a still highlight, which is
+  material rather than interaction — and it was already the only state
+  `app/not-found.tsx` and every touch screen ever had.
 
 ## Things that look wrong but aren't
 

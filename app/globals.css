@@ -274,26 +274,20 @@
   /* ─── The card face ───────────────────────────────────────── */
 
   /**
-   * Registered so they can be interpolated. An unregistered custom property is
-   * an unanimatable token: `transition: --mk-lit` on one does nothing at all,
-   * and `calc()` on one inside `rgb()` is invalid at computed-value time. The
-   * registration is what makes both work, and it is the whole reason the
-   * specular highlight can fade in instead of snapping.
+   * Registered so it can be interpolated. An unregistered custom property is an
+   * unanimatable token — `@keyframes` on one does nothing at all. Registering
+   * it as an `<angle>` is what lets the travelling light below actually travel.
    */
-  @property --mk-mx {
-    syntax: "<percentage>";
-    inherits: true;
-    initial-value: 26%;
+  @property --mk-ring {
+    syntax: "<angle>";
+    inherits: false;
+    initial-value: 0deg;
   }
-  @property --mk-my {
-    syntax: "<percentage>";
-    inherits: true;
-    initial-value: 12%;
-  }
-  @property --mk-lit {
-    syntax: "<number>";
-    inherits: true;
-    initial-value: 0;
+
+  @keyframes mkRing {
+    to {
+      --mk-ring: 360deg;
+    }
   }
 
   /**
@@ -303,10 +297,11 @@
    * order by accident is how the grain ends up over the type.
    *
    *   0  the embossed isotipo watermark  (a child <svg>)
-   *   1  the specular highlight          (a child div, .card-lit)
-   *   2  the grain                       (::before)
-   *   3  the bevel                       (::after)
-   *   4  the content                     (a child div)
+   *   1  a fixed specular highlight       (a child div, .card-lit)
+   *   2  the grain                        (::before, mix-blend-mode: overlay)
+   *   3  the bevel                        (::after)
+   *   4  the content                      (a child div)
+   *   5  the hover ring                   (a child div, .mk-ring)
    *
    * `isolation: isolate` is not optional: the grain blends with `overlay`, and
    * without a stacking context of its own it would reach past the card and
@@ -337,9 +332,6 @@
       ),
       radial-gradient(94% 116% at 96% 100%, rgba(0, 0, 0, 0.32), transparent 58%),
       linear-gradient(142deg, #175057 0%, #0f353c 44%, #082227 100%);
-    /* Only the intensity is transitioned. The position tracks the pointer
-       frame by frame, so easing it as well would read as lag. */
-    transition: --mk-lit 0.45s ease;
   }
 
   /* Grain. ~4% of an `feTurbulence` tile, blended `overlay`, and it is the
@@ -376,14 +368,16 @@
   }
 
   /**
-   * The specular highlight, which replaces a white bar that swept the card on
+   * A fixed specular highlight. It replaced a white bar that swept the card on
    * a 6.5s infinite loop — the most recognisable tell of a template card.
    *
-   * `--mk-lit: 0` is a **finished look, not a fallback**: a fixed, discreet
-   * highlight at the top left. That matters because app/not-found.tsx renders
-   * outside the locale layout and mounts no motion at all, so this static
-   * state is the only one that card will ever have. Same for a touch screen,
-   * where there is no pointer to follow.
+   * It used to follow the pointer, through three registered custom properties
+   * that JS wrote on hover. That came out: a glow moving across the face is
+   * what the hover ring replaced, and leaving a mechanism in place with nothing
+   * driving it is worse than deleting it. What is left is the part that was
+   * always doing the work — a still highlight that makes the surface read as
+   * lit rather than painted, and that is the only state app/not-found.tsx and
+   * every touch screen ever had anyway.
    */
   .card-lit {
     position: absolute;
@@ -392,11 +386,74 @@
     pointer-events: none;
     border-radius: inherit;
     background: radial-gradient(
-      46% 66% at var(--mk-mx) var(--mk-my),
-      rgba(255, 255, 255, calc(0.09 + 0.2 * var(--mk-lit))),
-      rgba(255, 255, 255, calc(0.02 + 0.05 * var(--mk-lit))) 44%,
+      46% 66% at 26% 12%,
+      rgba(255, 255, 255, 0.11),
+      rgba(255, 255, 255, 0.03) 44%,
       transparent 68%
     );
+  }
+
+  /**
+   * A light travelling around the border, on hover.
+   *
+   * One conic gradient rotated by animating a registered `<angle>`: a tight
+   * bright head with a long dim tail, which is what reads as *motion* rather
+   * than as a spinning stick.
+   *
+   * Only the edge band shows, and that is the whole trick: two masks, one
+   * clipped to `content-box` and one to `border-box`, composited with
+   * `exclude`. What survives is the 2px padding ring. No `filter: blur()`
+   * anywhere near it — see the note in components/site/aurora.tsx for what
+   * animating on top of a filter costs.
+   *
+   * Drop it on any card: the parent needs `position: relative` and its own
+   * `border-radius`, which `border-radius: inherit` then picks up.
+   */
+  .mk-ring {
+    position: absolute;
+    inset: 0;
+    z-index: 5;
+    pointer-events: none;
+    border-radius: inherit;
+    padding: 2px;
+    opacity: 0;
+    transition: opacity 0.35s ease;
+    background: conic-gradient(
+      from var(--mk-ring),
+      transparent 0deg,
+      rgba(106, 221, 155, 0.14) 16deg,
+      var(--color-mint) 44deg,
+      rgba(106, 221, 155, 0.34) 76deg,
+      transparent 148deg,
+      transparent 360deg
+    );
+    -webkit-mask-image: linear-gradient(#000 0 0), linear-gradient(#000 0 0);
+    -webkit-mask-clip: content-box, border-box;
+    -webkit-mask-composite: xor;
+    mask-image: linear-gradient(#000 0 0), linear-gradient(#000 0 0);
+    mask-clip: content-box, border-box;
+    mask-composite: exclude;
+  }
+
+  /* Keyed off the parent's hover, and gated on a real pointer: there is no
+     hover on a touch screen, so a tap would light a ring that never leaves.
+     Under reduced motion the wildcard at the end of this file freezes the
+     animation on its last keyframe, which leaves a still ring — the right
+     outcome, so the rule is deliberately not inside a motion query. */
+  @media (hover: hover) and (pointer: fine) {
+    :hover > .mk-ring {
+      opacity: 1;
+      animation: mkRing 2.8s linear infinite;
+    }
+    /* A mint edge under the travelling light, so the whole border reads as lit
+       and not just the moving arc. Added to the bevel rather than to the root,
+       because two call sites override the root's shadow with `!shadow-[...]`. */
+    .card-face:hover::after {
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.26),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.5),
+        inset 0 0 0 1px rgba(106, 221, 155, 0.34);
+    }
   }
 
   /**

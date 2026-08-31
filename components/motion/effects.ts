@@ -499,41 +499,17 @@ export function spotlight(ctx: Ctx) {
   return els.length;
 }
 
-/**
- * The card's specular highlight tracking the pointer.
+/*
+ * There is deliberately no `cardLight` effect any more.
  *
- * This is what replaced a white bar sweeping the card on a 6.5s infinite loop —
- * the single most recognisable tell of a template card. The three custom
- * properties are registered in globals.css so `--mk-lit` can be transitioned;
- * the position is written raw, because it should track the pointer exactly and
- * easing it would read as lag.
+ * It wrote `--mk-mx` / `--mk-my` / `--mk-lit` on `.card-face` so a specular
+ * highlight followed the pointer. The card's hover treatment is now a mint
+ * light travelling around its border, which is **pure CSS** (`.mk-ring` in
+ * globals.css, an animated registered `<angle>` behind a masked conic
+ * gradient). No JavaScript, nothing to wire on navigation, and nothing to get
+ * stuck on a touch screen. The still highlight that remains is material, not
+ * interaction.
  */
-export function cardLight(ctx: Ctx) {
-  const els = claim<HTMLElement>(".card-face", "lit");
-  for (const el of els) {
-    ctx.on(el, "pointermove", (ev) => {
-      const e = ev as PointerEvent;
-      const b = el.getBoundingClientRect();
-      el.style.setProperty(
-        "--mk-mx",
-        `${((e.clientX - b.left) / b.width) * 100}%`,
-      );
-      el.style.setProperty(
-        "--mk-my",
-        `${((e.clientY - b.top) / b.height) * 100}%`,
-      );
-      el.style.setProperty("--mk-lit", "1");
-    });
-    ctx.on(el, "pointerleave", () => {
-      // Back to the authored resting values rather than to nothing: the static
-      // highlight is a finished look, not a fallback.
-      el.style.removeProperty("--mk-mx");
-      el.style.removeProperty("--mk-my");
-      el.style.setProperty("--mk-lit", "0");
-    });
-  }
-  return els.length;
-}
 
 /* ─── The lists the provider runs ────────────────────────────────────────── */
 
@@ -578,6 +554,6 @@ export const alwaysKeys = [
 
 /** Needs a real pointer. A separate matchMedia branch rather than an `if`, so
  *  that plugging a mouse in wires them and unplugging one reverts them. */
-export const pointerOnly: Effect[] = [magnetic, spotlight, cardLight];
+export const pointerOnly: Effect[] = [magnetic, spotlight];
 
-export const pointerOnlyKeys = ["mag", "glow", "lit"] as const;
+export const pointerOnlyKeys = ["mag", "glow"] as const;

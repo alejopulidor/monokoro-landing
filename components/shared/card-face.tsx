@@ -107,9 +107,14 @@ export function CardFace({
         </svg>
       )}
 
-      {/* The specular highlight. Static until a pointer writes --mk-mx/--mk-my
-          and --mk-lit on the parent — see components/motion/. */}
+      {/* A fixed specular highlight — part of the material, not a hover
+          effect. */}
       <div className="card-lit" aria-hidden />
+
+      {/* The hover treatment: a mint light travelling around the border. Pure
+          CSS, gated on `(hover: hover)`, so nothing here needs JavaScript and
+          a touch screen gets nothing to get stuck on. */}
+      <div className="mk-ring" aria-hidden />
 
       <div
         className={cx(
