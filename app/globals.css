@@ -1,0 +1,517 @@
+@import "tailwindcss";
+
+/* ══════════════════════════════════════════════════════════════════════════
+   Design tokens — from the `Monokoro v5` canvas.
+
+   Tailwind v4 has no config file: every token lives in this @theme block and
+   Tailwind generates the utilities from it (`--color-mint` → `bg-mint`,
+   `text-mint`, `border-mint`, …). Both `bg-mint` and `bg-[var(--color-mint)]`
+   work; the bracket form is used where a value goes inside a gradient.
+
+   The site is **light-first** — paper, not a dark app shell. The dark panels
+   (hero visual, card section, closing CTA) are deliberate contrast moments,
+   not a theme.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+@theme {
+  /* Surfaces */
+  --color-paper: #F1F4ED;   /* page background */
+  --color-ink: #0D2E33;     /* primary text, primary button */
+  --color-mint: #6ADD9B;    /* brand accent */
+  --color-teal: #2C7A80;    /* secondary accent, eyebrow labels */
+  --color-teal-deep: #338289;
+  --color-muted: #3E6165;   /* body copy */
+  --color-faint: #7A9391;   /* mono captions, tertiary */
+  --color-slate: #9BAFAC;   /* inactive rail labels */
+
+  /* Dark panel ramp — the gradient stops used by the inset dark cards */
+  --color-panel-1: #12464C;
+  --color-panel-2: #07242A;
+  --color-panel-3: #0A2B31;
+  --color-panel-4: #14545A;
+  --color-onDark: #EFF6F0;  /* text on the dark panels */
+
+  /* Chat mock */
+  --color-chat-bg: #EDF2EB;
+  --color-chat-bar: #E4EBE2;
+  --color-chat-mine: #D5F2DF;
+  --color-check: #1C6B62;
+
+  /* Hairlines and glass. Written as raw rgba because they are composited over
+     both paper and white cards — a solid token would band on one of them. */
+  --color-line: rgba(13, 46, 51, 0.14);
+  --color-line-soft: rgba(13, 46, 51, 0.08);
+  --color-card: rgba(255, 255, 255, 0.86);
+
+  /* Fonts, loaded by next/font in app/[locale]/layout.tsx */
+  --font-sans: var(--font-schibsted), system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains), ui-monospace, monospace;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    background: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+  ::selection {
+    background: var(--color-mint);
+    color: var(--color-ink);
+  }
+  /* Mono is the design's caption voice: eyebrows, rates, specs, timestamps.
+     Always uppercase with wide tracking — see `.eyebrow`. */
+  .ff-m {
+    font-family: var(--font-mono);
+  }
+  /* Any figure that updates in place (the rate ticker, the quoter output, the
+     5-minute lock) needs tabular figures or the row jitters digit by digit. */
+  .tnum {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum" 1;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   Component classes.
+
+   Everything below is wrapped in `@layer components` **on purpose**, and it
+   is not cosmetic. Tailwind v4 declares `@layer theme, base, components,
+   utilities` — unlayered CSS beats every one of them. Left unlayered, a
+   custom class like `.btn { display: inline-flex }` would silently win over
+   a utility on the same element, so `min-[760px]:hidden` on a `.btn` would
+   do nothing. Inside `components`, utilities override these, which is what
+   anyone writing `class="btn hidden"` expects.
+
+   The `@keyframes` and `@property` at-rules below define names, not
+   competing declarations, so the layer does not affect them.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+@layer components {
+  /* ─── Type ─────────────────────────────────────────────────────────────── */
+
+  /* The small mono label that opens every section. */
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    color: var(--color-teal);
+  }
+
+  /* Section headline. The clamp is the design's: it scales from a phone to a
+     1320px canvas without a single breakpoint. */
+  .h-section {
+    font-size: clamp(34px, 5.6vw, 72px);
+    line-height: 0.98;
+    letter-spacing: -0.04em;
+    font-weight: 600;
+    text-wrap: balance;
+  }
+
+  .h-hero {
+    font-size: clamp(42px, 8vw, 104px);
+    line-height: 0.92;
+    letter-spacing: -0.045em;
+    font-weight: 600;
+    text-wrap: balance;
+  }
+
+  .lede {
+    font-size: 19px;
+    line-height: 1.55;
+    color: var(--color-muted);
+    text-wrap: pretty;
+  }
+
+  /* ─── Layout ───────────────────────────────────────────────────────────── */
+
+  /* The design's one content width, and its one fluid gutter. Every section
+     uses this pair — do not invent a second max-width. */
+  .shell {
+    max-width: 1320px;
+    margin: 0 auto;
+  }
+  .gutter {
+    padding-left: clamp(20px, 4vw, 40px);
+    padding-right: clamp(20px, 4vw, 40px);
+  }
+  /* Vertical rhythm between sections. `-lg` is the wider gap used between the
+     big set pieces. */
+  .sec {
+    padding-top: clamp(64px, 10vw, 120px);
+  }
+  .sec-lg {
+    padding-top: clamp(72px, 10vw, 132px);
+  }
+
+  /* ─── Motion ───────────────────────────────────────────────────────────── */
+
+  @keyframes riseIn {
+    from { opacity: 0; transform: translateY(30px); }
+  }
+  @keyframes sheen {
+    0%        { transform: translateX(-150%) skewX(-16deg); }
+    55%, 100% { transform: translateX(280%) skewX(-16deg); }
+  }
+  @keyframes floatY {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-10px); }
+  }
+  @keyframes bubbleIn {
+    from { opacity: 0; transform: translateY(10px) scale(0.985); }
+  }
+  @keyframes blinkDot {
+    0%, 80%, 100% { opacity: 0.25; }
+    40%           { opacity: 1; }
+  }
+  @keyframes auroraA {
+    0%, 100% { transform: translate3d(-6%, -4%, 0) scale(1); }
+    50%      { transform: translate3d(8%, 6%, 0) scale(1.25); }
+  }
+  @keyframes auroraB {
+    0%, 100% { transform: translate3d(6%, 5%, 0) scale(1.18); }
+    50%      { transform: translate3d(-7%, -6%, 0) scale(1); }
+  }
+  @keyframes pulseRing {
+    0%        { transform: scale(0.85); opacity: 0.7; }
+    70%, 100% { transform: scale(2.1); opacity: 0; }
+  }
+  @keyframes marquee {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-50%); }
+  }
+  @keyframes drawCheck {
+    to { stroke-dashoffset: 0; }
+  }
+  @keyframes scanline {
+    0%   { transform: translateY(-100%); }
+    100% { transform: translateY(400%); }
+  }
+
+  /* Mount-time entrance for above-the-fold content. Stagger with an inline
+     `animation-delay`; there is no scroll trigger here because the hero is
+     already in view. */
+  .hero-in {
+    animation: riseIn 0.85s cubic-bezier(0.2, 0.85, 0.25, 1) both;
+  }
+
+  /**
+   * Scroll reveal. Starts hidden and is switched on by adding `.in`, which
+   * `components/site/site-effects.tsx` does from one shared IntersectionObserver.
+   *
+   * It is a *transition*, not an animation, on purpose: a transition that never
+   * fires leaves the element at its start value, so the reduced-motion block
+   * below has to neutralize the start state rather than just stop a timeline.
+   */
+  .rv {
+    opacity: 0;
+    transform: translateY(28px);
+    transition:
+      opacity 0.8s cubic-bezier(0.2, 0.85, 0.25, 1),
+      transform 0.8s cubic-bezier(0.2, 0.85, 0.25, 1);
+  }
+  .rv.in {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* Magnetic hover. The transform is written by the pointermove handler in
+     site-effects; this rule only supplies the easing so it glides back. */
+  .mk-mag {
+    transition:
+      transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1),
+      background 0.22s,
+      color 0.22s,
+      box-shadow 0.3s;
+  }
+
+  .mk-chip {
+    transition:
+      background 0.22s,
+      border-color 0.22s,
+      transform 0.22s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  .mk-chip:hover {
+    background: var(--color-ink);
+    border-color: var(--color-ink);
+    color: var(--color-onDark);
+    transform: translateY(-2px);
+  }
+
+  .mk-step {
+    transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  .mk-step:hover {
+    transform: translateY(-6px);
+  }
+  .mk-dot {
+    transition: background 0.3s, color 0.3s, border-color 0.3s,
+      transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  .mk-step:hover .mk-dot {
+    background: var(--color-ink);
+    color: var(--color-mint);
+    border-color: var(--color-ink);
+    transform: scale(1.08);
+  }
+
+  /* A row that slides right and tints as the pointer crosses it (the "para qué
+     sirve" list, the blog index list). */
+  .mk-row {
+    transition: padding-left 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), background 0.3s;
+  }
+  .mk-row:hover {
+    padding-left: 14px;
+    background: rgba(255, 255, 255, 0.5);
+  }
+
+  .mk-lift {
+    transition: transform 0.32s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.32s;
+  }
+  .mk-lift:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 30px 60px -40px rgba(13, 46, 51, 0.7);
+  }
+
+  /* ─── Dark panel decoration ────────────────────────────────────────────── */
+
+  /* Two drifting blurred blobs and a faint grid. They live inside a panel that
+     is `position: relative; overflow: hidden` — every one of them is absolutely
+     positioned and pointer-events:none, so they never intercept a click. */
+  .mk-aur-a {
+    position: absolute;
+    width: 70%;
+    height: 130%;
+    left: -10%;
+    top: -30%;
+    border-radius: 50%;
+    filter: blur(70px);
+    background: radial-gradient(circle, rgba(106, 221, 155, 0.34), transparent 68%);
+    animation: auroraA 24s ease-in-out infinite;
+    pointer-events: none;
+  }
+  .mk-aur-b {
+    position: absolute;
+    width: 62%;
+    height: 120%;
+    right: -12%;
+    bottom: -34%;
+    border-radius: 50%;
+    filter: blur(80px);
+    background: radial-gradient(circle, rgba(51, 130, 137, 0.46), transparent 70%);
+    animation: auroraB 31s ease-in-out infinite;
+    pointer-events: none;
+  }
+  .mk-grid {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-image:
+      linear-gradient(rgba(106, 221, 155, 0.055) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(106, 221, 155, 0.055) 1px, transparent 1px);
+    background-size: 56px 56px;
+    mask-image: radial-gradient(120% 90% at 50% 0%, #000 25%, transparent 78%);
+    -webkit-mask-image: radial-gradient(120% 90% at 50% 0%, #000 25%, transparent 78%);
+  }
+  /* Cursor spotlight. Painted by site-effects only while the pointer is inside
+     the `.mk-glow` ancestor; opacity is what fades it in and out. */
+  .mk-spot {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.5s;
+    background: radial-gradient(320px circle at 50% 50%, rgba(106, 221, 155, 0.16), transparent 62%);
+  }
+
+  /* The dark panel itself. */
+  .panel {
+    position: relative;
+    border-radius: 26px;
+    overflow: hidden;
+    background: linear-gradient(150deg, var(--color-panel-1), var(--color-panel-2));
+    box-shadow:
+      0 50px 100px -50px rgba(4, 22, 26, 0.9),
+      inset 0 1px 0 rgba(239, 246, 240, 0.1);
+  }
+  /* Smaller/darker variant used by the inline cards. */
+  .panel-flat {
+    position: relative;
+    border-radius: 24px;
+    overflow: hidden;
+    background: linear-gradient(150deg, var(--color-ink), var(--color-panel-3));
+    color: var(--color-onDark);
+    box-shadow: 0 40px 80px -56px rgba(13, 46, 51, 0.95);
+  }
+
+  /* ─── Light card ───────────────────────────────────────────────────────── */
+
+  .card {
+    background: var(--color-card);
+    border: 1px solid var(--color-line-soft);
+    border-radius: 24px;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  }
+
+  /* ─── Buttons ──────────────────────────────────────────────────────────── */
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    border-radius: 999px;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+  .btn-ink {
+    padding: 15px 26px;
+    background: var(--color-ink);
+    color: var(--color-paper);
+    font-size: 16px;
+    box-shadow: 0 18px 40px -22px rgba(13, 46, 51, 0.95);
+  }
+  .btn-ink:hover {
+    background: var(--color-teal);
+    color: var(--color-paper);
+  }
+  .btn-outline {
+    padding: 15px 26px;
+    border: 1px solid rgba(13, 46, 51, 0.2);
+    background: rgba(255, 255, 255, 0.6);
+    font-size: 16px;
+  }
+  .btn-outline:hover {
+    background: #ffffff;
+    color: var(--color-ink);
+  }
+  /* On the dark panels: mint fill, ink label. White on mint fails contrast. */
+  .btn-mint {
+    padding: 16px 30px;
+    background: var(--color-mint);
+    color: var(--color-ink);
+    font-size: 17px;
+    font-weight: 600;
+    box-shadow: 0 24px 50px -24px rgba(106, 221, 155, 0.7);
+  }
+  .btn-mint:hover {
+    background: var(--color-onDark);
+    color: var(--color-ink);
+  }
+  .btn-paper {
+    padding: 14px 24px;
+    background: var(--color-onDark);
+    color: var(--color-ink);
+    font-size: 15.5px;
+  }
+  .btn-paper:hover {
+    background: var(--color-mint);
+    color: var(--color-ink);
+  }
+  .btn-ghost-dark {
+    padding: 14px 24px;
+    border: 1px solid rgba(239, 246, 240, 0.28);
+    color: var(--color-onDark);
+    font-size: 15.5px;
+  }
+  .btn-ghost-dark:hover {
+    background: rgba(239, 246, 240, 0.1);
+    color: var(--color-onDark);
+  }
+  .btn-sm {
+    padding: 11px 20px;
+    font-size: 15px;
+  }
+
+  /* ─── Spec list ────────────────────────────────────────────────────────── */
+
+  /* The key/value mono rows on the dark panels (TASA HOY · DESDE · GESTIÓN…).
+     Rendered as a <dl>; the rule below draws the hairline above each row and
+     the wrapper closes the list with one more. */
+  .spec-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 16px;
+    justify-content: space-between;
+    padding: 13px 0;
+    border-top: 1px solid rgba(239, 246, 240, 0.24);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.08em;
+  }
+
+  /* ─── Misc ─────────────────────────────────────────────────────────────── */
+
+  .no-scrollbar {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* ─── Unlayered: start states that must win ────────────────────────────── */
+
+/* These two carry the *initial* frame of a JS-driven animation. They are
+   deliberately outside the layer so no utility can flatten them, and so the
+   reduced-motion block at the end of this file can cancel them. */
+
+/**
+ * The card in the "Tarjeta Monokoro" section. It starts tilted away and off
+ * the top, and `SiteEffects` writes opacity + transform as it scrolls in.
+ *
+ * The start state lives here rather than in JS so the very first paint is
+ * already correct — otherwise the card flashes flat before the first scroll
+ * frame lands. The reduced-motion block at the bottom of this file cancels it.
+ */
+#mk-card {
+  opacity: 0;
+  will-change: transform;
+  transform: translateY(-120px) rotateX(38deg) rotateZ(-13deg) scale(0.82);
+}
+
+/* The connector between the three "cómo funciona" steps. Drawn from the left
+   as the row reveals; `SiteEffects` adds `.in`. */
+#mk-line {
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 1.2s cubic-bezier(0.2, 0.85, 0.25, 1);
+}
+#mk-line.in {
+  transform: scaleX(1);
+}
+
+/**
+ * Reduced motion.
+ *
+ * `.rv` and the card need their *start* state neutralized, not just their
+ * animation stopped: both begin at opacity 0, so removing the timeline alone
+ * would leave the page blank. The card's inline transform is written by JS,
+ * which also checks the media query — see components/site/site-effects.tsx.
+ */
+@media (prefers-reduced-motion: reduce) {
+  .rv {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+  .hero-in {
+    animation: none;
+  }
+  #mk-card {
+    opacity: 1;
+    transform: none;
+  }
+  #mk-line {
+    transform: scaleX(1);
+    transition: none;
+  }
+  .mk-aur-a,
+  .mk-aur-b {
+    animation: none;
+  }
+}
