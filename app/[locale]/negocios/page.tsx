@@ -9,7 +9,6 @@ import { breadcrumbSchema, faqSchema, productSchema } from "@/lib/schema";
 import { ogImage } from "@/lib/og";
 import { BUSINESS_FAQ_ITEMS } from "@/content/faq";
 import {
-  BIZ_API,
   BIZ_CASES,
   BIZ_COMPARE,
   BIZ_HERO_SPECS,
@@ -32,10 +31,10 @@ import { Faq } from "@/components/shared/faq";
 import { Closing } from "@/components/shared/closing";
 import { CardFan } from "@/components/card/hero-visual";
 import {
-  BizApiAccess,
+  BizApi,
   BizBrand,
+  BizDashboard,
   BizHow,
-  BizPanel,
   BizPerks,
   BizPockets,
   BizProblem,
@@ -50,7 +49,7 @@ export function generateStaticParams() {
 
 const TITLE = "Monokoro Negocios — Tarjetas en dólares para tu operación";
 const DESCRIPTION =
-  "Tarjetas empresariales en dólares para pauta, proveedores y viáticos. Ilimitadas, creadas desde WhatsApp y administradas en un panel con bolsillos por campaña, con tu marca si la quieres y API y SDK para conectarlas a tu sistema.";
+  "Tarjetas empresariales en dólares para pauta, proveedores y viáticos. Ilimitadas, creadas desde WhatsApp y administradas en un dashboard, con bolsillos que comparten saldo entre varias tarjetas y API, SDK e iframe para montarlas en tu producto.";
 
 export async function generateMetadata({
   params,
@@ -93,16 +92,22 @@ export async function generateMetadata({
  * Same argument shape as `/tarjeta` but aimed at an operator rather than a
  * person: what breaks today (problema) → what it is (qué es) → how you start
  * (cómo) → who it is for (casos) → how the money is organised (bolsillos) →
- * where you run it (panel) → what the rates are (tasas) → why it beats the
- * bank (compara) → what makes it yours (marca, API) → the ask (empezar, faq,
+ * where you run it (dashboard) → what the rates are (tasas) → why it beats the
+ * bank (compara) → what makes it yours (marca, api) → the ask (empezar, faq,
  * cierre).
  *
- * `bolsillos` and `panel` sit after `casos` in that order because they answer
- * the two questions the use cases raise, and only in that order: "how do I keep
- * forty cards' money apart?" and then "where do I watch it?". They also have
- * deliberately different shapes — `bolsillos` is two columns with a drawing,
- * `panel` is a head plus a grid — because three grid sections in a row is what
- * makes a page read as padding.
+ * `bolsillos` and `dashboard` sit after `casos` in that order because they
+ * answer the two questions the use cases raise, and only in that order: "how do
+ * I keep forty cards' money apart?" and then "where do I watch it?".
+ *
+ * **`Monokoro Negocios v2.dc.html` is the current canvas for this page**, not
+ * v5 — the client updated it later, despite the version number. It designs
+ * `#bolsillos`, `#dashboard` and `#api`, and it is also **leaner than what
+ * ships here**: it has no `#que-es`, `#compara`, `#marca`, `#empezar`,
+ * `#aprende` or `#faq`. Those are kept deliberately for now — dropping `#faq`
+ * would take the `FAQPage` structured data with it and `#aprende` the internal
+ * links — but the divergence is a decision someone should make on purpose
+ * rather than discover.
  */
 export default async function BusinessPage({
   params,
@@ -178,7 +183,7 @@ export default async function BusinessPage({
 
         <BizPockets />
 
-        <BizPanel />
+        <BizDashboard />
 
         <BizRates />
 
@@ -199,14 +204,7 @@ export default async function BusinessPage({
 
         <BizBrand />
 
-        <RuledList
-          id="api"
-          eyebrow="PARA EQUIPOS TÉCNICOS"
-          title="Conéctalo a lo que ya usas."
-          lede="Todo lo que se hace por chat se puede hacer por API, con SDK y piezas listas para embeber en tu producto — para cuando el volumen deja de caber en una conversación."
-          items={BIZ_API}
-          after={<BizApiAccess />}
-        />
+        <BizApi />
 
         <BizStart />
 

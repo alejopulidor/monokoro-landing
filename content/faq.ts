@@ -138,11 +138,11 @@ export const BUSINESS_FAQ_ITEMS: FaqItem[] = [
   },
   {
     q: "¿Qué es un bolsillo?",
-    a: "Un saldo al que conectas varias tarjetas. Le pones un monto, eliges cuáles tarjetas gastan de ahí, y recargas en un solo lugar en vez de tarjeta por tarjeta. Entre todas no pueden gastar más de lo que hay en el bolsillo, y el saldo sigue en la billetera de la empresa.",
+    a: "Un saldo compartido por varias tarjetas. Creas el bolsillo, lo fondeas una vez y las tarjetas que le asignes consumen de ahí, así que no tienes que repartir el presupuesto tarjeta por tarjeta. Puedes tener varios —uno para marketing, otro para proveedores— y el saldo sigue en la billetera de la empresa.",
   },
   {
-    q: "¿Hay un panel además del chat?",
-    a: "Sí. El chat es lo más rápido para crear o congelar una tarjeta; el panel es donde el equipo ve todas las tarjetas, los bolsillos y los movimientos en una sola pantalla, con el comprobante de cada gasto.",
+    q: "¿Hay un dashboard además del chat?",
+    a: "Sí. WhatsApp es el atajo para crear o congelar una tarjeta; el dashboard de administración es la vista completa: todas las tarjetas y bolsillos en una pantalla, con su gasto del mes, su límite y sus movimientos exportables.",
   },
   {
     q: "¿Qué pasa si alguien sale del equipo?",

@@ -15,12 +15,15 @@ import { fmtCOP, fmtUSD } from "@/lib/format";
 import { RATE_BUY, RATE_CARD, RATE_SELL, waLink } from "@/lib/config";
 import { cx } from "@/lib/cx";
 import {
+  BIZ_API,
+  BIZ_API_ENDPOINTS,
   BIZ_BRAND,
   BIZ_BRAND_SPECS,
+  BIZ_DASH_PERKS,
+  BIZ_DASH_ROWS,
   BIZ_CHAT,
   BIZ_CHAT_MS,
   BIZ_FLOW,
-  BIZ_PANEL,
   BIZ_PERKS,
   BIZ_POCKET_CARDS,
   BIZ_POCKETS,
@@ -155,111 +158,122 @@ export function BizPerks() {
 }
 
 /**
- * The band that closes `#api`, passed in through `RuledList`'s `after` slot.
+ * "Móntalo dentro de tu producto." — `#api`.
  *
- * The canvas had a dark band here with a `POST /v1/cards` chip and a
- * "Ver documentación →" link whose `href` was `#`. Neither shipped, and the
- * endpoint chip still should not: printing a plausible-but-unverified route is
- * the same class of mistake as printing a plausible BIN on the card face. So
- * the band asks for access instead, which is true today and is also how the
- * SDK and the iframe actually get handed over.
+ * From the v2 canvas, and it **absorbed personalización**. There used to be a
+ * separate `#marca` item promising cobranded artwork inside Apple Pay and
+ * Google Pay; the canvas moved that here, next to the iframe, because both are
+ * the same claim seen from the buyer's side — *your users see your brand, we
+ * supply the rails*. Telling it in two places was worse than either.
  *
- * `lib/nav.ts` already has the `ready` flag for the day a docs page exists —
- * that is where the link belongs then, not here.
+ * `#marca` keeps the card face and the client's own issuance. If a wallet or
+ * cobranding sentence reappears there, one of the two is now stale.
+ *
+ * ## The endpoints
+ *
+ * `BIZ_API_ENDPOINTS` prints three real-looking routes, and an earlier version
+ * of this section deliberately printed none — a plausible-but-unverified route
+ * is the same class of mistake as a plausible BIN on the card face. They are
+ * here **only** because the canvas specifies them, which makes them the
+ * client's own spec rather than this repo's guess. That is the whole
+ * justification; if the real API differs they come out again.
+ *
+ * ## The iframe mock
+ *
+ * Browser chrome, a dashed card standing in for the client's artwork, and two
+ * buttons. Deliberately **not** a `CardFace`: that component draws Monokoro's
+ * card, and the entire point here is that the face belongs to someone else.
+ * The dashed border is what reads as "your design goes here" rather than as a
+ * card we designed badly.
+ *
+ * The CTA is the one place on this site that names a cost without naming a
+ * figure, so it has to offer a way to ask.
  */
-export function BizApiAccess() {
+export function BizApi() {
   return (
-    <div className="rv panel-flat mt-[clamp(30px,4vw,44px)] flex flex-wrap items-center justify-between gap-x-10 gap-y-6 p-[clamp(26px,3.4vw,40px)]">
-      <div className="min-w-0 flex-[1_1_400px]">
-        <div className="ff-m text-[12px] tracking-[0.14em] text-[var(--color-mint)]">
-          PARA EMPEZAR A INTEGRAR
-        </div>
-        <p className="mt-4 max-w-[560px] text-[clamp(19px,2.4vw,26px)] leading-[1.25] tracking-[-0.025em] text-pretty">
-          Te damos las credenciales, la documentación y el SDK, y un equipo
-          acompaña la primera integración.
-        </p>
-      </div>
-      <a
-        href={waLink(
-          "Hola, quiero integrar por API. ¿Me pasan el acceso y la documentación?",
-        )}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="mk-mag btn btn-paper"
-      >
-        Pedir el acceso <Arrow />
-      </a>
-    </div>
-  );
-}
-
-/**
- * "Varias tarjetas gastando de un mismo saldo."
- *
- * The two-column shape `BizBrand` uses: something drawn on the left, the
- * reasons on the right. The drawing is the argument here -- "varias tarjetas
- * consumen del mismo saldo" is one of those claims a diagram settles in a
- * second and a paragraph never quite does.
- *
- * **Read the docblock on `BIZ_POCKETS` before touching any of this copy.** The
- * first version defined a bolsillo from the amount ("un monto reservado del
- * saldo") and the client could not tell what it did or why he would want it.
- * The concept is the container and the cards wired to it; the amount is just
- * what you put in. The panel below therefore labels the *relationship*, not
- * only the parts.
- *
- * The figure is a **mock**, and it is labelled as one twice: `SALDO DE EJEMPLO`
- * on the panel and again inside the `aria-label`. Same rule as `CardFace`'s
- * balance -- a number on this site that is not marked referential or as an
- * example is a bug. And `role="img"` collapses the subtree, so the label has to
- * carry everything a sighted reader gets.
- */
-export function BizPockets() {
-  return (
-    <section id="bolsillos" className="sec-lg gutter">
+    <section id="api" className="sec-lg gutter">
       <div className="shell">
         <SectionHead
-          eyebrow="BOLSILLOS"
-          title="Varias tarjetas gastando de un mismo saldo."
-          lede="Un bolsillo es un saldo con tarjetas conectadas: le pones un monto, eliges cuáles tarjetas gastan de ahí y todas consumen del mismo. Recargas en un solo lugar, y entre todas no pueden gastar más de lo que hay en el bolsillo."
+          eyebrow="PARA EQUIPOS TÉCNICOS"
+          title="Móntalo dentro de tu producto."
+          lede="Si en vez de usar nuestras tarjetas quieres emitir las tuyas, tenemos API y SDK. Tus usuarios ven tu marca; nosotros ponemos la infraestructura."
         />
 
-        <div className="mt-[clamp(30px,4vw,46px)] flex flex-wrap gap-5">
-          <div
-            className="rv panel-flat flex min-w-0 flex-[1_1_320px] flex-col self-start p-[clamp(26px,3.4vw,38px)]"
-            role="img"
-            aria-label="Ejemplo de un bolsillo llamado Pauta con un saldo de ejemplo de 4.500,00 dólares. Tiene tres tarjetas conectadas que gastan de ese mismo saldo: Meta Ads terminada en 4821, TikTok Ads terminada en 7302 y Google Ads terminada en 5140."
-          >
-            <div className="ff-m text-[11px] tracking-[0.14em] text-[var(--color-mint)]">
-              BOLSILLO · PAUTA
-            </div>
-            <div className="tnum mt-3 text-[clamp(34px,4.6vw,52px)] font-semibold leading-none tracking-[-0.04em]">
-              {fmtUSD(4500)}{" "}
-              <span className="text-[0.42em] font-medium">USD</span>
-            </div>
-            <div className="ff-m mt-2.5 text-[10.5px] tracking-[0.14em] text-[rgba(239,246,240,0.5)]">
-              SALDO DE EJEMPLO
+        <div className="mt-[clamp(32px,4vw,48px)] flex flex-wrap gap-5">
+          <div className="rv flex min-w-0 flex-[1_1_360px] flex-col gap-[22px] rounded-[22px] bg-[var(--color-ink)] p-[clamp(26px,3.6vw,40px)] text-[var(--color-onDark)]">
+            <div className="ff-m text-[11px] tracking-[0.12em] text-[var(--color-mint)]">
+              TU IFRAME, TU MARCA
             </div>
 
-            <div className="ff-m mt-[clamp(24px,3vw,32px)] flex items-baseline justify-between gap-4 text-[10.5px] tracking-[0.14em] text-[rgba(239,246,240,0.62)]">
-              <span>TARJETAS CONECTADAS</span>
-              <span className="tnum text-[var(--color-mint)]">
-                {BIZ_POCKET_CARDS.length}
-              </span>
+            <div
+              className="overflow-hidden rounded-[16px] border border-[rgba(239,246,240,0.16)] bg-[rgba(239,246,240,0.06)]"
+              role="img"
+              aria-label="Ejemplo del componente embebido en la aplicación del cliente: la tarjeta con su logo y sus colores, y los botones de recargar y congelar."
+            >
+              <div className="flex items-center gap-[7px] border-b border-[rgba(239,246,240,0.14)] px-3.5 py-[11px]">
+                <span className="h-[9px] w-[9px] rounded-full bg-[rgba(239,246,240,0.28)]" />
+                <span className="h-[9px] w-[9px] rounded-full bg-[rgba(239,246,240,0.28)]" />
+                <span className="h-[9px] w-[9px] rounded-full bg-[rgba(239,246,240,0.28)]" />
+                <span className="ff-m ml-2 text-[10.5px] tracking-[0.1em] text-[rgba(239,246,240,0.55)]">
+                  TU APP
+                </span>
+              </div>
+              <div className="flex flex-col gap-3.5 p-[clamp(18px,3vw,24px)]">
+                <div className="flex aspect-[1.585] items-center justify-center rounded-[14px] border border-dashed border-[rgba(239,246,240,0.45)] bg-[linear-gradient(140deg,#2C7A80,#4FB89E)]">
+                  <span className="ff-m text-[11px] tracking-[0.12em] text-[#062A2F]">
+                    TU LOGO · TUS COLORES
+                  </span>
+                </div>
+                <div className="flex gap-2">
+                  <span className="flex-1 rounded-[10px] bg-[var(--color-mint)] py-2.5 text-center text-[13px] font-semibold text-[var(--color-ink)]">
+                    Recargar
+                  </span>
+                  <span className="flex-1 rounded-[10px] border border-[rgba(239,246,240,0.28)] py-2.5 text-center text-[13px]">
+                    Congelar
+                  </span>
+                </div>
+              </div>
             </div>
 
-            <SpecList items={BIZ_POCKET_CARDS} className="mt-3" />
-
-            <div className="ff-m mt-4 text-[10.5px] tracking-[0.14em] text-[rgba(239,246,240,0.5)]">
-              LAS TRES GASTAN DE ESTE SALDO
-            </div>
+            <code className="ff-m block rounded-[10px] border border-[rgba(239,246,240,0.16)] bg-[rgba(239,246,240,0.08)] px-4 py-3.5 text-[13px] leading-[1.7] whitespace-pre text-[var(--color-mint)]">
+              {BIZ_API_ENDPOINTS.join("\n")}
+            </code>
           </div>
 
-          <CardGrid
-            items={BIZ_POCKETS}
-            min={250}
-            className="min-w-0 flex-[1_1_420px] content-start gap-4"
-          />
+          <div className="flex min-w-0 flex-[1_1_300px] flex-col gap-5">
+            {BIZ_API.map((a) => (
+              <div
+                key={a.n}
+                className="rv card mk-lift flex flex-1 flex-col gap-3 rounded-[20px] p-[clamp(24px,3vw,32px)]"
+              >
+                <div className="ff-m text-[11px] tracking-[0.12em] text-[var(--color-teal)]">
+                  {a.n}
+                </div>
+                <h3 className="text-[21px] font-semibold leading-[1.15] tracking-[-0.025em]">
+                  {a.t}
+                </h3>
+                <p className="text-base leading-[1.55] text-[var(--color-muted)] text-pretty">
+                  {a.d}
+                </p>
+              </div>
+            ))}
+
+            <div className="rv flex flex-wrap items-center gap-x-5 gap-y-3.5 rounded-[20px] border border-[var(--color-line-soft)] bg-[#E9F0E4] p-[clamp(20px,3vw,26px)]">
+              <p className="min-w-0 flex-[1_1_200px] text-base leading-[1.5] text-[var(--color-muted)] text-pretty">
+                ¿Necesitas el detalle técnico o una cotización de co-branding?
+              </p>
+              <a
+                href={waLink(
+                  "Hola, quiero información sobre la API y el SDK de Monokoro",
+                )}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mk-mag btn btn-ink btn-sm"
+              >
+                Pedir más información <Arrow />
+              </a>
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -267,29 +281,253 @@ export function BizPockets() {
 }
 
 /**
- * "Todo lo que pasa por el chat, también lo ves en un panel."
+ * "Un solo saldo para muchas tarjetas." — `#bolsillos`.
  *
- * The one section that introduces a *second* place to operate, which is why the
- * copy is additive rather than corrective. `BIZ_HERO_SPECS`, `BIZ_PERKS`, the
- * compare table and the closing CTA all promise WhatsApp; the panel is where a
- * team *reads* the operation, and the chat stays the fast path for changing it.
- * Reword it as a replacement and eight other strings start lying.
+ * Copy and drawing both come from `Monokoro Negocios v2.dc.html`, the newest
+ * canvas for this page. Two earlier attempts here failed for reasons worth
+ * keeping written down: the first defined a bolsillo from the amount ("un
+ * monto reservado del saldo") and the client could not tell what it did; the
+ * second invented the word "frente". The canvas's lede is three beats in
+ * order — creas, fondeas una vez, las tarjetas que le asignes consumen de
+ * ahí — and it names marketing, which is the use case that makes it concrete.
  *
- * The `id` is `panel`, and that is the only place the word may appear as an
- * identifier: `.panel` and `.panel-flat` in `app/globals.css` are the dark
- * surface primitives, so a class named after this product would collide with
- * them. Product word in the copy and the anchor, never in a class name.
+ * The drawing is the argument. A balance with three cards *listed* beside it
+ * could mean anything; three cards each showing what they took **from** it can
+ * only mean one thing. That is why every chip carries a `spend`, and why the
+ * hairline runs from the balance down into the grid: it draws the relationship
+ * instead of asserting it.
+ *
+ * The figure is a mock and says so twice, on the label and in the
+ * `aria-label`. `role="img"` collapses the subtree, so the label has to carry
+ * everything a sighted reader gets.
  */
-export function BizPanel() {
+export function BizPockets() {
   return (
-    <section id="panel" className="sec-lg gutter">
+    <section id="bolsillos" className="sec-lg gutter">
       <div className="shell">
         <SectionHead
-          eyebrow="ADMINISTRACIÓN"
-          title="Todo lo que pasa por el chat, también lo ves en un panel."
-          lede="El chat sigue siendo lo más rápido para crear o congelar una tarjeta. El panel es donde tu equipo lo ve todo junto: cada tarjeta, cada bolsillo con sus tarjetas conectadas, y cada movimiento."
+          eyebrow="BOLSILLOS"
+          title="Un solo saldo para muchas tarjetas."
+          lede="Creas un bolsillo, lo fondeas una vez y todas las tarjetas que le asignes consumen de ahí. Ideal para marketing: no tienes que repartir el presupuesto tarjeta por tarjeta."
         />
-        <CardGrid items={BIZ_PANEL} min={240} className="mt-[clamp(32px,4vw,48px)]" />
+
+        <div className="mt-[clamp(32px,4vw,48px)] flex flex-wrap gap-5">
+          <div
+            className="rv flex min-w-0 flex-[1_1_380px] flex-col justify-center gap-[26px] rounded-[22px] bg-[linear-gradient(150deg,#12464C,#07242A)] p-[clamp(28px,4vw,44px)]"
+            role="img"
+            aria-label="Ejemplo de un bolsillo llamado Marketing Q3 con un saldo compartido de ejemplo de 8.400,00 dólares. Tres tarjetas consumen de ese mismo saldo: Meta Ads terminada en 4821, con 1.240 dólares gastados este mes; TikTok Ads terminada en 7302, con 860 dólares; y Herramientas terminada en 5514, con 312 dólares."
+          >
+            <div className="rounded-[18px] border border-[rgba(106,221,155,0.28)] bg-[rgba(239,246,240,0.08)] p-[clamp(18px,3vw,24px)]">
+              <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1.5">
+                <span className="text-base font-semibold text-[var(--color-onDark)]">
+                  Bolsillo · Marketing Q3
+                </span>
+                <span className="ff-m text-[11px] tracking-[0.12em] text-[var(--color-mint)]">
+                  SALDO COMPARTIDO · EJEMPLO
+                </span>
+              </div>
+              <div className="tnum mt-3.5 text-[clamp(30px,4.4vw,42px)] font-semibold leading-none tracking-[-0.035em] text-[var(--color-onDark)]">
+                {fmtUSD(8400)}{" "}
+                <span className="ff-m text-[15px] tracking-normal text-[rgba(239,246,240,0.6)]">
+                  USD
+                </span>
+              </div>
+            </div>
+
+            {/* The connector. Decorative on its own, but it is what turns a
+                balance plus a list into "these draw from that". */}
+            <div className="flex justify-center" aria-hidden>
+              <span className="h-[26px] w-px bg-[rgba(106,221,155,0.5)]" />
+            </div>
+
+            <div className="grid grid-cols-[repeat(auto-fit,minmax(120px,1fr))] gap-3">
+              {BIZ_POCKET_CARDS.map((c) => (
+                <div
+                  key={c.num}
+                  className="flex flex-col gap-2 rounded-[14px] border border-[rgba(239,246,240,0.16)] bg-[rgba(239,246,240,0.06)] px-4 py-3.5"
+                >
+                  <span className="ff-m text-[10px] tracking-[0.12em] text-[var(--color-mint)]">
+                    {c.tag}
+                  </span>
+                  <span className="ff-m tnum text-[12.5px] tracking-[0.1em] text-[var(--color-onDark)]">
+                    {c.num}
+                  </span>
+                  <span className="tnum text-[12.5px] text-[rgba(239,246,240,0.62)]">
+                    {c.spend}
+                  </span>
+                </div>
+              ))}
+            </div>
+
+            <p className="ff-m text-[11px] tracking-[0.1em] text-[rgba(239,246,240,0.5)]">
+              TODAS CONSUMEN DEL MISMO BOLSILLO
+            </p>
+          </div>
+
+          <div className="flex min-w-0 flex-[1_1_300px] flex-col gap-5">
+            {BIZ_POCKETS.map((p) => (
+              <div
+                key={p.n}
+                className="rv card mk-lift flex flex-1 flex-col gap-3 rounded-[20px] p-[clamp(24px,3vw,32px)]"
+              >
+                <div className="ff-m text-[11px] tracking-[0.12em] text-[var(--color-teal)]">
+                  {p.n}
+                </div>
+                <h3 className="text-[21px] font-semibold leading-[1.15] tracking-[-0.025em]">
+                  {p.t}
+                </h3>
+                <p className="text-base leading-[1.55] text-[var(--color-muted)] text-pretty">
+                  {p.d}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/**
+ * "Y si prefieres pantalla, también." — `#dashboard`.
+ *
+ * The id is `dashboard`, not `panel`, because that is what the canvas and the
+ * product call it — and because `.panel` / `.panel-flat` are this site's dark
+ * surface primitives, so a product called "panel" would collide with them the
+ * moment anyone reached for a class name.
+ *
+ * **The mock is the canvas's decision, not this file's.** The first version of
+ * this section deliberately showed nothing, on the grounds that inventing a
+ * screen nobody has seen is worse than describing one. The canvas now designs
+ * that screen, and a table of spend against a limit says what a dashboard is
+ * *for* in a way three bullet points never did.
+ *
+ * Its whole point is that it does not replace the chat. `BIZ_HERO_SPECS`,
+ * `BIZ_PERKS` and the closing CTA all promise WhatsApp, so the lede puts them
+ * in order — WhatsApp is the shortcut, the dashboard is the full view — rather
+ * than correcting them.
+ *
+ * Marked `role="img"`: every figure in it is invented, and a screen reader
+ * walking the cells would meet four fake balances as if they were the
+ * visitor's own.
+ */
+export function BizDashboard() {
+  return (
+    <section id="dashboard" className="sec-lg gutter">
+      <div className="shell">
+        <SectionHead
+          eyebrow="DASHBOARD"
+          title="Y si prefieres pantalla, también."
+          lede="WhatsApp es el atajo; el dashboard de administración es la vista completa. Todas tus tarjetas y bolsillos en un lugar, con todo lo que necesitas para gestionarlos."
+        />
+
+        <div
+          className="rv mt-[clamp(32px,4vw,48px)] overflow-hidden rounded-[22px] border border-[rgba(13,46,51,0.1)] bg-white"
+          role="img"
+          aria-label="Vista de ejemplo del dashboard: las tarjetas activas del bolsillo Marketing Q3, con su gasto del mes, su límite y su estado. Meta Ads terminada en 4821, 1.240 dólares, sin límite, activa. TikTok Ads terminada en 7302, 860 dólares, límite de 1.500 al mes, activa. Herramientas terminada en 5514, 312 dólares, límite de 500 al mes, activa. Viáticos de Laura Gómez terminada en 9037, 148,50 dólares, límite de 300, congelada."
+        >
+          <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-2.5 border-b border-[rgba(13,46,51,0.1)] bg-[rgba(13,46,51,0.03)] px-[clamp(18px,3vw,28px)] py-[18px]">
+            <span className="ff-m text-[11px] tracking-[0.12em] text-[var(--color-faint)]">
+              TARJETAS ACTIVAS · BOLSILLO MARKETING Q3
+            </span>
+            <span className="text-[14.5px] font-medium text-[var(--color-teal)]">
+              Exportar movimientos
+            </span>
+          </div>
+
+          {/* Scrolls rather than squashing: four columns do not fit a phone. */}
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[330px] border-collapse text-left">
+              <thead>
+                <tr className="ff-m text-[11px] tracking-[0.1em] text-[var(--color-faint)]">
+                  <th
+                    scope="col"
+                    className="w-[42%] px-[clamp(11px,2vw,24px)] py-3.5 font-normal"
+                  >
+                    TARJETA
+                  </th>
+                  <th
+                    scope="col"
+                    className="px-[clamp(11px,2vw,24px)] py-3.5 font-normal"
+                  >
+                    GASTO DEL MES
+                  </th>
+                  {/* Four columns need 540px, so the table scrolls — but on a
+                      phone that puts ESTADO out of reach, and the frozen pill
+                      is the one cell that shows the dashboard is for *acting*.
+                      Dropping LÍMITE below 560px keeps the three that carry the
+                      point. The `aria-label` still describes all four. */}
+                  <th
+                    scope="col"
+                    className="hidden px-[clamp(11px,2vw,24px)] py-3.5 font-normal min-[560px]:table-cell"
+                  >
+                    LÍMITE
+                  </th>
+                  <th
+                    scope="col"
+                    className="px-[clamp(11px,2vw,24px)] py-3.5 font-normal"
+                  >
+                    ESTADO
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {BIZ_DASH_ROWS.map((r) => (
+                  <tr
+                    key={r.num}
+                    className="border-t border-[rgba(13,46,51,0.09)] text-[15px]"
+                  >
+                    <th
+                      scope="row"
+                      className="px-[clamp(11px,2vw,24px)] py-4 text-left font-medium"
+                    >
+                      <span className="flex flex-col gap-[3px]">
+                        <span>{r.name}</span>
+                        <span className="ff-m tnum text-xs font-normal tracking-[0.08em] text-[var(--color-faint)]">
+                          {r.num}
+                        </span>
+                      </span>
+                    </th>
+                    <td className="tnum px-[clamp(11px,2vw,24px)] py-4 text-[var(--color-muted)]">
+                      {r.spend}
+                    </td>
+                    <td className="tnum hidden px-[clamp(11px,2vw,24px)] py-4 text-[var(--color-muted)] min-[560px]:table-cell">
+                      {r.limit}
+                    </td>
+                    <td className="px-[clamp(11px,2vw,24px)] py-4">
+                      <span
+                        className={cx(
+                          "inline-block rounded-full px-3 py-[5px] text-[12.5px] font-medium",
+                          r.off
+                            ? "bg-[rgba(13,46,51,0.08)] text-[var(--color-muted)]"
+                            : "bg-[rgba(106,221,155,0.18)] text-[#1B6B4A]",
+                        )}
+                      >
+                        {r.state}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div className="mt-5 grid grid-cols-[repeat(auto-fit,minmax(240px,1fr))] gap-5">
+          {BIZ_DASH_PERKS.map((d) => (
+            <div
+              key={d.t}
+              className="rv card flex flex-col gap-2.5 rounded-[20px] p-[clamp(22px,3vw,28px)]"
+            >
+              <h3 className="text-[19px] font-semibold leading-[1.15] tracking-[-0.02em]">
+                {d.t}
+              </h3>
+              <p className="text-[15.5px] leading-[1.55] text-[var(--color-muted)] text-pretty">
+                {d.d}
+              </p>
+            </div>
+          ))}
+        </div>
       </div>
     </section>
   );
@@ -352,7 +590,7 @@ export function BizBrand() {
         <SectionHead
           eyebrow="PERSONALIZACIÓN"
           title="Tarjetas con tu marca, no con la nuestra."
-          lede="Emítelas cobrandeadas para tu equipo, tus clientes o tu propio producto. Nosotros ponemos la infraestructura en dólares digitales; la cara la pones tú."
+          lede="Emítelas cobrandeadas para tu equipo, tus clientes o tu propio producto. Nosotros ponemos la infraestructura en dólares digitales; la cara la pones tú. Llevar tu marca a la wallet se cotiza aparte — el detalle está más abajo, con la API."
         />
 
         <div className="mt-[clamp(30px,4vw,46px)] flex flex-wrap gap-5">
@@ -382,20 +620,6 @@ export function BizBrand() {
               items={BIZ_BRAND_SPECS}
               className="rv panel-flat rounded-[22px] p-[clamp(22px,3vw,28px)]"
             />
-            {/* The only place on the site that names a cost without naming a
-                figure, so it needs somewhere to ask. Same quiet link treatment
-                as the article link in `BizWhatIs` — never a second button, or
-                it competes with the page's one CTA. */}
-            <a
-              href={waLink(
-                "Hola, quiero saber qué incluye el cobranding de las tarjetas y cuánto cuesta",
-              )}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-2.5 self-start border-b border-[rgba(44,122,128,0.35)] pb-[3px] text-[17px] font-medium text-[var(--color-teal)] hover:text-[var(--color-ink)]"
-            >
-              Pedir el detalle del cobranding <Arrow />
-            </a>
           </div>
 
           <CardGrid

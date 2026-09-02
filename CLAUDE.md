@@ -60,14 +60,16 @@ Implemented so far:
 | --- | --- |
 | `Monokoro v5.dc.html` | `/es/` |
 | `Monokoro Tarjeta v5.dc.html` | `/es/tarjeta/` |
-| `Monokoro Negocios v5.dc.html` | `/es/negocios/` |
+| `Monokoro Negocios v2.dc.html` + `v5` | `/es/negocios/` |
 | `Monokoro Blog.dc.html` | `/es/aprende/` |
 | `Monokoro Dolar Digital.dc.html` | `/es/aprende/que-es-un-dolar-digital/` |
 | `Monokoro Blog Ahorrar.dc.html` | `/es/aprende/ahorrar-en-dolares-colombia/` |
 | `Monokoro Blog Suscripciones.dc.html` | `/es/aprende/tarjeta-rechazada-pagos-internacionales/` |
 | `Monokoro 404.dc.html` | `app/not-found.tsx` → `out/404.html` |
 
-Every canvas is implemented. The older ones (`Monokoro.dc.html`, `v2`, `v3`, `v4`, `Negocios.dc.html`, `Tarjeta.dc.html`) are superseded — **v5 is the reference**, don't port from them.
+Every canvas is implemented. **Check the file dates, not the version numbers.** `Monokoro Negocios v2.dc.html` was edited on 2026-09-02, four days after `Negocios v5`, and it is the current design for `#bolsillos`, `#dashboard` and `#api` — the "v2" in its name is misleading. Everything else still follows v5; the remaining older files (`Monokoro.dc.html`, `v2`, `v3`, `v4`, `Negocios.dc.html`, `Tarjeta.dc.html`) are superseded.
+
+The updated Negocios canvas is also **leaner than what ships**: it has no `#que-es`, `#compara`, `#marca`, `#empezar`, `#aprende` or `#faq`. Those are kept for now — dropping `#faq` would take the `FAQPage` structured data with it, and `#aprende` the internal links — but that divergence is a decision to make on purpose, not to discover. See the docblock on `app/[locale]/negocios/page.tsx`.
 
 The 404's optional auto-redirect is deliberately not implemented: moving someone off a page they are still reading is hostile, and it was opt-in in the canvas too.
 
@@ -758,23 +760,22 @@ them is roadmap rather than reality, the copy has to say so or come out.
     answer is a structured-data lie, not just a paragraph), added a hero spec
     row on both product pages, changed `CARD_USES` item 05, and appears in
     `/tarjeta`'s `DESCRIPTION`, its `Service` schema and `/llms.txt`.
-13. **The admin panel and the bolsillos** (`/negocios`, sections `#bolsillos`
-    and `#panel`). **Two** sections now, plus two FAQ answers, a step in the
-    money's journey, a compare-table row and a drawn example with a mock
-    balance — all describing a surface nobody outside the company has seen. If
-    either is not live this is the second most expensive part of the site,
-    after issuance itself. The bolsillos section carries a figure
-    (`4.500,00 USD`), which is labelled `SALDO DE EJEMPLO` on the panel and
-    again in its `aria-label`; keep both if the copy changes.
-14. **API, SDK and the iframe** (`/negocios`, section `#api`) — card issuing
-    and control, balances, conversion, webhooks with a receipt per spend, an
-    SDK over the same API, and an iframe that renders the card's number,
-    expiry and CVV. Six capabilities, presented as available. Two extra things
-    to check here: the iframe copy says the data goes in "sin que tu sistema
-    tenga que tocarlos", which is an architectural claim rather than a feature;
-    and **no endpoint is printed anywhere on purpose** — the canvas had a
-    `POST /v1/cards` chip and it stays out until someone confirms the real
-    shape, for the same reason a plausible BIN never goes on the card face.
+13. **The dashboard and the bolsillos** (`/negocios`, sections `#bolsillos`
+    and `#dashboard`). Both are designed in the updated canvas, so the *shape*
+    is the client's; what nobody has confirmed is that either is **live**. The
+    dashboard section now draws a table of four cards with spend, limits and a
+    frozen state — that is a lot of specific product behaviour asserted in
+    pixels. If it is not live this is the second most expensive part of the
+    site, after issuance itself. Every figure in both sections is a mock and is
+    labelled as one (`SALDO COMPARTIDO · EJEMPLO`, and the `aria-label` on each
+    `role="img"`); keep that if the copy changes.
+14. **API, SDK, the iframe — and three printed endpoints** (`/negocios`,
+    section `#api`). `BIZ_API_ENDPOINTS` now prints `POST /v1/pockets`,
+    `POST /v1/cards` and `GET /v1/cards/:id/transactions`. An earlier version
+    printed none, on the rule that a plausible-but-unverified route is the same
+    mistake as a plausible BIN on the card face; they are here **only** because
+    the updated canvas specifies them, which makes them the client's spec
+    rather than this repo's guess. **If the real API differs, they come out.**
 15. **Cobranded cards** — "tu logo al frente", for a team, for clients, or for
     the customer's own product; plus the same artwork **at the tokenization
     level**, so the card carries the client's brand inside Apple Pay and Google

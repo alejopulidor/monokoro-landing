@@ -20,8 +20,9 @@ import type { ChatMsg } from "@/components/shared/agent-chat";
 
 export const BIZ_HERO_SPECS = [
   { k: "TARJETAS", v: "ILIMITADAS" },
+  { k: "BOLSILLOS", v: "UN SALDO, VARIAS TARJETAS" },
   { k: "CREACIÓN", v: "EN MINUTOS, DESDE EL CHAT" },
-  { k: "CONTROL", v: "CONGELA · RECARGA · ELIMINA" },
+  { k: "CONTROL", v: "WHATSAPP + DASHBOARD" },
   { k: "RESPALDO", v: "DÓLARES DIGITALES TOKENIZADOS" },
   { k: "PAGAS EN", v: "DÓLARES O PESOS" },
   { k: "EN TIENDA", v: "APPLE PAY · GOOGLE PAY" },
@@ -56,16 +57,26 @@ export const BIZ_PERKS: GridItem[] = [
   },
   {
     n: "02",
+    t: "Bolsillos compartidos",
+    d: "Un saldo que alimenta varias tarjetas a la vez.",
+  },
+  {
+    n: "03",
+    t: "Apple Pay y Google Pay",
+    d: "Se agregan a la wallet para pagar también en tienda.",
+  },
+  {
+    n: "04",
     t: "Control desde WhatsApp",
     d: "Congela, elimina o recarga con un mensaje.",
   },
   {
-    n: "03",
+    n: "05",
     t: "Saldo que no se derrite",
     d: "Protegido de la devaluación mientras no lo gastas.",
   },
   {
-    n: "04",
+    n: "06",
     t: "Tasas visibles siempre",
     d: "Antes de cada operación, sin cargos sorpresa.",
   },
@@ -166,91 +177,125 @@ export const BIZ_CASES: RuledItem[] = [
 ];
 
 /**
- * Bolsillos.
+ * Bolsillos, from `Monokoro Negocios v2.dc.html` — which is the **newest**
+ * canvas for this page despite the version number: the client updated it after
+ * v5, and it is where `#bolsillos`, `#dashboard` and `#api` are designed.
  *
- * **Define it from the cards, not from the balance.** The first version opened
- * with "un monto reservado del saldo del negocio", and the client's reaction was
- * that neither the feature nor the point came across. He described it himself as
- * "un lugar donde puedo conectar varias tarjetas" — so the container and the
- * connecting *are* the concept, and the amount is only what you put in it. Lead
- * with the balance and the reader has to work backwards to what it is for.
+ * The canvas settles the framing that two earlier attempts here got wrong. It
+ * is not "un monto reservado del saldo" (defines it from the amount, and the
+ * client could not tell what it was for) and not "un saldo por frente" (a word
+ * nobody uses, invented here). It is: **creas un bolsillo, lo fondeas una vez,
+ * y las tarjetas que le asignes consumen de ahí.** Three beats, in that order.
  *
- * The word **"frente"** was in that first version too ("un saldo por frente")
- * and it was invented here — nobody calls it that. Name the concrete things
- * instead: por campaña, por cliente, por proveedor, por equipo.
+ * "Ideal para marketing" is in the lede on purpose — it was the use case the
+ * client named first, and it is what makes the feature concrete.
  *
- * It must also never read as a *replacement* for "una tarjeta por campaña",
- * which is what the rest of the page sells. It is the other axis: the cards stay
- * as many as you need, and a bolsillo is what they draw from.
- *
- * And a bolsillo is a division of the business's own balance — see the file
- * header on why it is never a *cuenta*.
+ * Still, in compliance terms, a bolsillo is a division of the business's *own*
+ * balance: never a *cuenta*, never a *sub-cuenta*, never something Monokoro
+ * holds. See the file header.
  */
 export const BIZ_POCKETS: GridItem[] = [
   {
     n: "01",
-    t: "Recargas el bolsillo, no cada tarjeta",
-    d: "Un solo movimiento y todas las tarjetas conectadas tienen con qué gastar. Se acabó repartir montos una por una.",
+    t: "Fondeas una vez",
+    d: "Un solo movimiento y el bolsillo queda con saldo para todas las tarjetas que dependen de él.",
   },
   {
     n: "02",
-    t: "El tope lo pone el bolsillo",
-    d: "Entre todas las tarjetas conectadas no pueden gastar más de lo que hay ahí. Subes o bajas el monto cuando quieras.",
+    t: "Reparte solo",
+    d: "Cada tarjeta gasta del mismo saldo. No tienes que adivinar cuánto ponerle a cada una.",
   },
   {
     n: "03",
-    t: "Si una tarjeta se quema, el bolsillo sigue",
-    d: "Creas otra, la conectas al mismo bolsillo y la campaña no se detiene ni pierde el saldo que quedaba.",
-  },
-  {
-    n: "04",
-    t: "El gasto ya viene agrupado",
-    d: "Cada bolsillo tiene su propio historial: lo de pauta no se mezcla con lo de proveedores ni con lo de un cliente.",
+    t: "Varios bolsillos",
+    d: "Uno para marketing, otro para proveedores, otro por cliente. Cada uno con su propio saldo y sus tarjetas.",
   },
 ];
 
 /**
- * The example bolsillo drawn in that section: three cards wired to one
- * balance.
+ * The cards drawn hanging off the example bolsillo.
  *
- * The first version listed the cards under the figure with no label, and a
- * list of cards beside an amount does not say they are *connected* to it —
- * which was exactly the part that did not land. The panel now names the
- * relationship twice, as a heading over the list and as a line under it,
- * because that relationship is the whole concept.
+ * `spend` is what makes the drawing work: three cards listed beside a balance
+ * could be anything, but three cards each showing what they took *from* it can
+ * only mean one thing. That per-card figure is the canvas's idea and it is the
+ * reason this version communicates where the last one did not.
  *
- * Marked as an example in the copy *and* in the panel's `aria-label`, the same
- * way `CardFace` handles its own mock balance. A figure on this site that is
- * not labelled as referential or as an example is a bug.
+ * Every number here is a mock and the panel says so — `SALDO COMPARTIDO ·
+ * EJEMPLO` on the figure and again in the `aria-label`. A figure on this site
+ * that is not marked referential or as an example is a bug.
  */
 export const BIZ_POCKET_CARDS = [
-  { k: "META ADS", v: "•••• 4821" },
-  { k: "TIKTOK ADS", v: "•••• 7302" },
-  { k: "GOOGLE ADS", v: "•••• 5140" },
+  { tag: "META ADS", num: "•••• 4821", spend: "1.240 USD este mes" },
+  { tag: "TIKTOK ADS", num: "•••• 7302", spend: "860 USD este mes" },
+  { tag: "HERRAMIENTAS", num: "•••• 5514", spend: "312 USD este mes" },
 ];
 
+export type DashRow = {
+  name: string;
+  num: string;
+  spend: string;
+  limit: string;
+  state: string;
+  /** Renders the state pill muted instead of mint. */
+  off?: boolean;
+};
+
 /**
- * The admin surface, and the one section that adds a *second* place to do
- * things. The chat stays the fast path on purpose — every other section on this
- * page, the hero specs and the closing CTA all say "desde WhatsApp", so the
- * copy here is additive ("también lo ves en un panel") and never a correction.
- * Reword it as a replacement and eight other strings start lying.
+ * The example rows in the dashboard mock.
+ *
+ * An earlier version of this section deliberately had **no** screenshot,
+ * because inventing a product surface nobody has seen is worse than describing
+ * one. The canvas now designs that surface, so it is the design's decision
+ * rather than this file's invention — and a table showing spend against a
+ * limit says what the dashboard is for in a way three bullet points cannot.
+ *
+ * The frozen row is not filler: it is the only one that shows the dashboard is
+ * for *acting*, not just reading.
  */
-export const BIZ_PANEL: GridItem[] = [
+export const BIZ_DASH_ROWS: DashRow[] = [
   {
-    n: "01",
-    t: "El panel de administración",
-    d: "Entras y ves las tarjetas del negocio en una sola pantalla, con su saldo y su estado.",
+    name: "Meta Ads · Campaña Q3",
+    num: "•••• 4821",
+    spend: "1.240,00 USD",
+    limit: "Sin límite",
+    state: "Activa",
   },
   {
-    n: "02",
-    t: "Gestión de cada tarjeta",
-    d: "Creas, recargas, congelas o eliminas desde el panel, igual que por chat.",
+    name: "TikTok Ads · Creativos",
+    num: "•••• 7302",
+    spend: "860,00 USD",
+    limit: "1.500 USD / mes",
+    state: "Activa",
   },
   {
-    n: "03",
-    t: "Movimientos y comprobantes",
-    d: "Cada gasto con su comprobante, filtrable por tarjeta, por bolsillo o por fecha.",
+    name: "Herramientas · Software",
+    num: "•••• 5514",
+    spend: "312,00 USD",
+    limit: "500 USD / mes",
+    state: "Activa",
+  },
+  {
+    name: "Viáticos · Laura Gómez",
+    num: "•••• 9037",
+    spend: "148,50 USD",
+    limit: "300 USD",
+    state: "Congelada",
+    off: true,
+  },
+];
+
+export const BIZ_DASH_PERKS = [
+  {
+    t: "Todo en una vista",
+    d: "Tarjetas, bolsillos, saldos y movimientos, sin abrir el chat.",
+  },
+  {
+    t: "Límites y permisos",
+    d: "Defines cuánto puede gastar cada tarjeta y quién del equipo la maneja.",
+  },
+  {
+    t: "Movimientos exportables",
+    d: "Descargas el detalle para tu contabilidad cuando lo necesites.",
   },
 ];
 
@@ -273,21 +318,16 @@ export const BIZ_BRAND: GridItem[] = [
   },
   {
     n: "02",
-    t: "Tu marca también en la wallet",
-    d: "El arte cobrandeado se puede llevar al nivel de tokenización, para que la tarjeta se vea con tu marca dentro de Apple Pay y Google Pay. Se cotiza aparte.",
-  },
-  {
-    n: "03",
     t: "Tarjetas para tus clientes",
     d: "Si tu producto necesita emitir tarjetas en dólares, las emites bajo tu nombre.",
   },
   {
-    n: "04",
+    n: "03",
     t: "Reglas a tu medida",
     d: "Límites por tarjeta, por equipo o por campaña, definidos como los maneja tu operación.",
   },
   {
-    n: "05",
+    n: "04",
     t: "Onboarding acompañado",
     d: "Un equipo humano configura, prueba y deja andando el flujo con tu gente.",
   },
@@ -297,40 +337,50 @@ export const BIZ_BRAND_SPECS = [
   { k: "DISEÑO", v: "TU MARCA" },
   { k: "RESPALDO", v: "DÓLARES DIGITALES" },
   { k: "EMISIÓN", v: "CHAT O API" },
-  { k: "EN LA WALLET", v: "SE COTIZA APARTE" },
 ];
 
-export const BIZ_API: RuledItem[] = [
+/**
+ * `#api`, from the v2 canvas — and note it now carries **personalización**
+ * too. The canvas folded what used to be a separate `#marca` story into here,
+ * which is why 02 and 03 are about the client's brand rather than about
+ * endpoints: the honest order is "here is how you put your product in front of
+ * it", not "here are our verbs".
+ *
+ * 03 states the cost. It is the only price-shaped sentence on the site and it
+ * names no figure on purpose — "te lo cotizamos según el volumen" is the
+ * canvas's own wording and it routes to the chat.
+ */
+export const BIZ_API: GridItem[] = [
   {
     n: "01",
-    t: "Emisión por API",
-    d: "Crea, congela y elimina tarjetas desde tu backend, sin pasar por el chat.",
+    t: "API y SDK",
+    d: "Creas tarjetas, bolsillos y consultas movimientos desde tu propio backend. Sin pasar por el chat.",
   },
   {
     n: "02",
-    t: "Saldos y movimientos",
-    d: "Consulta saldo y transacciones en tiempo real y concílialo con tu contabilidad.",
+    t: "Iframe personalizable",
+    d: "El componente donde tu usuario ve y usa la tarjeta se adapta a tu marca: colores, tipografía y estilos propios.",
   },
   {
     n: "03",
-    t: "Conversión pesos ↔ dólares",
-    d: "Cotiza y ejecuta el cambio desde tu sistema, con la tasa antes de confirmar.",
+    t: "Tokenización con tu marca",
+    d: "Las tarjetas pueden salir co-brandeadas en Apple Pay y Google Pay. Tiene un costo aparte — te lo cotizamos según el volumen.",
   },
-  {
-    n: "04",
-    t: "Webhooks y comprobantes",
-    d: "Cada gasto notifica a tu sistema con su comprobante, sin exportar planillas.",
-  },
-  {
-    n: "05",
-    t: "SDK",
-    d: "Sobre la misma API, para integrar sin construir el cliente desde cero.",
-  },
-  {
-    n: "06",
-    t: "Iframe con tu marca",
-    d: "Los datos de la tarjeta —número, fecha y CVV— se muestran dentro de un iframe que personalizas para que se vea como tu producto, sin que tu sistema tenga que tocarlos.",
-  },
+];
+
+/**
+ * Printed in the dark panel of `#api`.
+ *
+ * These stayed out of the first version of that section on purpose: a
+ * plausible-but-unverified route is the same class of mistake as a plausible
+ * BIN on the card face. The v2 canvas specifies them, so they are the client's
+ * own spec now rather than this repo's guess — **which is the only reason they
+ * are here.** If the real API differs, they come out again.
+ */
+export const BIZ_API_ENDPOINTS = [
+  "POST /v1/pockets",
+  "POST /v1/cards",
+  "GET  /v1/cards/:id/transactions",
 ];
 
 export const BIZ_REQUIREMENTS: GridItem[] = [
